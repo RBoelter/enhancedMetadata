@@ -15,6 +15,6 @@
 {/fbvFormSection}
 {fbvFormArea id="enhanced-metadata-form"}
 	{fbvFormSection title="plugins.generic.enhanced.metadata.submission.test" for="enhTest"}
-		{fbvElement type="text" multilingual=true id="enhTest" name="enhTest" value=$enhTest }
+		{fbvElement type="text" multilingual=true id="enhTest" name="enhTest" value=$enhTest}
 	{/fbvFormSection}
 {/fbvFormArea}
