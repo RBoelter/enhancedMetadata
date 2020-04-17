@@ -1,5 +1,5 @@
 {**
- * plugins/generic/orcidProfile/orcidProfile.tpl
+ * plugins/generic/enhancedMetadata/submissionMetaData.tpl
  *
  * Copyright (c) 2015-2019 University of Pittsburgh
  * Copyright (c) 2014-2019 Simon Fraser University
@@ -14,7 +14,23 @@
 	<p class="description">{translate key="plugins.generic.enhanced.metadata.submission.description"}</p>
 {/fbvFormSection}
 {fbvFormArea id="enhanced-metadata-form"}
-	{fbvFormSection title="plugins.generic.enhanced.metadata.submission.test" for="enhTest"}
-		{fbvElement type="text" multilingual=true id="enhTest" name="enhTest" value=$enhTest}
-	{/fbvFormSection}
+    {*{fbvFormSection title="plugins.generic.enhanced.metadata.submission.test" for="enhTest"}
+	{fbvElement type="text" multilingual=true id="enhTest" name="enhTest" value=$enhTest}
+	{/fbvFormSection}*}
+
+{foreach from=$formFields item=$itm}
+    {var_dump($currentLocale)}
+    {if $itm['type']=='text'}
+		<div class="section"{if $itm['conditions']} data-contition="{json_encode($itm['conditions'])|escape|trim}"{/if}>
+			<label>{$itm['title'][$currentLocale]}
+				<label class="description">{$itm['description'][$currentLocale]}</label>
+				<div>
+                    {fbvElement type=$itm['type'] multilingual=true id=$itm['name'] value=$itm['value']}
+				</div>
+			</label>
+		</div>
+    {elseif $itm['type']=='bool'}
+
+    {/if}
+{/foreach}
 {/fbvFormArea}

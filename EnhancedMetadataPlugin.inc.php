@@ -1,16 +1,38 @@
 <?php
 import('lib.pkp.classes.plugins.GenericPlugin');
 
-
+/**
+ * Class EnhancedMetadataPlugin
+ *
+ * To make this work in 3.1.2.x add parent::execute(); in execute function(L137) of \lib\pkp\controllers\wizard\fileUpload\form\SubmissionFilesMetadataForm.inc.php
+ */
 class EnhancedMetadataPlugin extends GenericPlugin
 {
 
 	/* unused at the moment */
 	var $json = [
-		"name" => "enhTest",
-		"type" => "text",
-		"title" => ["de_DE" => "test_de", "en_EN" => "test_en"],
-		"description" => ["de_DE" => "test_desc_de", "en_EN" => "test_desc_en"],
+		[
+			"name" => "enhTest2",
+			"type" => "bool",
+			"title" => ["de_DE" => "bool_test", "en_US" => "bool_test"],
+			"description" => ["de_DE" => "bool_test_desc_de", "en_US" => "bool_test_desc_en"],
+		],
+		[
+			"name" => "enhTest",
+			"type" => "text",
+			"title" => [
+				"de_DE" => "Beispiel Überschrift",
+				"en_US" => "Example headline"
+			],
+			"description" => [
+				"de_DE" => "Beispiel Beschreibung",
+				"en_US" => "Example description"
+			],
+			"conditions" =>
+				[
+					"enhTest2" => true
+				]
+		]
 	];
 
 	/**
@@ -41,7 +63,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			HookRegistry::register('submissionsubmitstep3form::initdata', array($this, 'submissionMetadataInitData'));
 			HookRegistry::register('issueentrysubmissionreviewform::initdata', array($this, 'submissionMetadataInitData'));
 			HookRegistry::register('quicksubmitform::initdata', array($this, 'submissionMetadataInitData'));
-			HookRegistry::register('supplementaryfilemetadataform::initdata', array($this, 'submissionMetadataInitData'));
+			/*HookRegistry::register('supplementaryfilemetadataform::initdata', array($this, 'submissionMetadataInitData'));*/
 			// Hook for readUserVars
 			HookRegistry::register('submissionsubmitstep3form::readuservars', array($this, 'addUserVars'));
 			HookRegistry::register('issueentrysubmissionreviewform::readuservars', array($this, 'addUserVars'));
@@ -52,7 +74,6 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			HookRegistry::register('issueentrysubmissionreviewform::execute', array($this, 'submissionMetadataExecute'));
 			HookRegistry::register('quicksubmitform::execute', array($this, 'submissionMetadataExecute'));
 			HookRegistry::register('supplementaryfilemetadataform::execute', array($this, 'submissionMetadataExecute'));
-
 			// Hook for save into db
 			HookRegistry::register('articledao::getLocaleFieldNames', array($this, 'addLocaleFieldNames'));
 			HookRegistry::register('supplementaryfiledaodelegate::getLocaleFieldNames', array($this, 'addLocaleFieldNames'));
@@ -71,10 +92,20 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		if (!is_array($form) && get_class($form) == 'SupplementaryFileMetadataForm') {
 			$request = PKPApplication::getRequest();
 			$templateMgr = TemplateManager::getManager($request);
+			$submissionFile = $form->getSubmissionFile();
+			if ($submissionFile)
+				$form->setData('enhTest2', $submissionFile->getData('enhTest2'));
 			$templateMgr->registerFilter("output", array($this, 'supplementaryMetadataFilter'));
 		} else {
 			$smarty =& $params[1];
 			$output =& $params[2];
+			$formFields = null;
+			foreach ($this->json as $item) {
+				$item['value'] = $smarty->get_template_vars($item['name']);
+				$formFields[] = $item;
+			}
+			var_dump($formFields);
+			$smarty->assign('formFields', $formFields);
 			$output .= $smarty->fetch($this->getTemplateResource('submissionMetaData.tpl'));
 		}
 		return false;
@@ -89,20 +120,16 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	{
 		$form =& $params[0];
 		$article = null;
-		error_log("#################################### submissionMetadataInitData " . get_class($form));
 		if (get_class($form) == 'SubmissionSubmitStep3Form') {
 			$article = $form->submission;
 		} elseif (get_class($form) == 'IssueEntrySubmissionReviewForm') {
 			$article = $form->getSubmission();
 		} elseif (get_class($form) == 'QuickSubmitForm') {
 			$article = $form->submission;
-		} else if (get_class($form) == 'SupplementaryFileMetadataForm') {
-			$form->setData('enhTest2', '11');
-		} else if (get_class($form) == 'SubmissionFilesMetadataForm') {
-			$form->setData('enhTest2', '12');
 		}
-		if ($article)
+		if ($article) {
 			$form->setData('enhTest', $article->getData('enhTest'));
+		}
 		return false;
 	}
 
@@ -115,13 +142,11 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	{
 		$form =& $params[0];
 		$userVars =& $params[1];
-		error_log("#################################### addUserVars " . get_class($form));
 		if (get_class($form) == 'SubmissionSubmitStep3Form' ||
 			get_class($form) == 'IssueEntrySubmissionReviewForm' ||
 			get_class($form) == 'QuickSubmitForm') {
 			$userVars[] = 'enhTest';
 		} else if (get_class($form) == 'SupplementaryFileMetadataForm') {
-			error_log("#################################### addUserVars " . get_class($form));
 			$userVars[] = 'enhTest2';
 		}
 		return false;
@@ -137,7 +162,6 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		$form =& $params[0];
 		$article = null;
 		$submissionFile = null;
-		error_log("#################################### submissionMetadataExecute " . get_class($form));
 		switch (get_class($form)) {
 			case 'SubmissionSubmitStep3Form':
 			case 'QuickSubmitForm':
@@ -146,15 +170,15 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			case 'IssueEntrySubmissionReviewForm':
 				$article = $form->getSubmission();
 				break;
-			case 'SubmissionFilesMetadataForm':
+			case 'SupplementaryFileMetadataForm':
 				$submissionFile = $form->getSubmissionFile();
-
 				break;
 		}
 		if ($article != null)
 			$article->setData('enhTest', $form->getData('enhTest'));
-		if ($submissionFile != null)
+		if ($submissionFile != null) {
 			$submissionFile->setData('enhTest2', $form->getData('enhTest2'));
+		}
 		return false;
 	}
 
@@ -166,10 +190,15 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	function addLocaleFieldNames($hookName, $params)
 	{
 		$form =& $params[0];
-		error_log("#################################### addLocaleFieldNames " . get_class($form));
-		if (get_class($form) == 'ArticleDAO') {
-			$fields =& $params[1];
-			$fields[] = 'enhTest';
+		switch (get_class($form)) {
+			case 'ArticleDAO':
+				$fields =& $params[1];
+				$fields[] = 'enhTest';
+				break;
+			case 'SupplementaryFileDAODelegate':
+				$fields =& $params[1];
+				$fields[] = 'enhTest2';
+				break;
 		}
 		return false;
 	}
@@ -179,7 +208,6 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		if (preg_match('/<fieldset\s*id="\s*fileMetaData\s*"\s*>/', $output, $matches, PREG_OFFSET_CAPTURE)) {
 			$match = $matches[0][0];
 			$offset = $matches[0][1];
-			error_log("--- supplementaryMetadataFilter --- " . $offset . " - " . $match);
 			$newOutput = substr($output, 0, $offset + strlen($match));
 			$newOutput .= $templateMgr->fetch($this->getTemplateResource('supplementaryMetaData.tpl'));
 			$newOutput .= substr($output, $offset + strlen($match));
