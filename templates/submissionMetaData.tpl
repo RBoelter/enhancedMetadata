@@ -10,27 +10,78 @@
  * Enhanced Metadata Submission Form
  *
  *}
+
+<style>
+	.hidden-field {
+		display: none;
+	}
+</style>
+
 {fbvFormSection title="plugins.generic.enhanced.metadata.submission.title" class="enhanced-metadata"}
 	<p class="description">{translate key="plugins.generic.enhanced.metadata.submission.description"}</p>
 {/fbvFormSection}
 {fbvFormArea id="enhanced-metadata-form"}
-    {*{fbvFormSection title="plugins.generic.enhanced.metadata.submission.test" for="enhTest"}
-	{fbvElement type="text" multilingual=true id="enhTest" name="enhTest" value=$enhTest}
-	{/fbvFormSection}*}
-
 {foreach from=$formFields item=$itm}
-    {var_dump($currentLocale)}
-    {if $itm['type']=='text'}
-		<div class="section"{if $itm['conditions']} data-contition="{json_encode($itm['conditions'])|escape|trim}"{/if}>
-			<label>{$itm['title'][$currentLocale]}
-				<label class="description">{$itm['description'][$currentLocale]}</label>
-				<div>
-                    {fbvElement type=$itm['type'] multilingual=true id=$itm['name'] value=$itm['value']}
-				</div>
+    {if $itm['type']=='text' || $itm['type']=='textarea'}
+		<div {if $itm['condition']}class="section hidden-field" data-condition="{json_encode($itm['condition'])|escape|trim}" {else}class="section"{/if}>
+			<label>{$itm['title'][$currentLocale]|escape|trim}{if $itm['required']}&nbsp;<span class="req">*</span>{/if}
+				<label class="description">{$itm['description'][$currentLocale]|escape|trim}</label>
+                {foreach from=$itm['fields'] item=$field}
+					<div>
+                        {fbvElement type=$itm['type'] multilingual="true" id=$field['name'] value=$field['value'] rich=$itm['wysiwyg'] required=$itm['required']}
+					</div>
+                {/foreach}
 			</label>
 		</div>
-    {elseif $itm['type']=='bool'}
-
+    {elseif $itm['type']=='radio' || $itm['type']=='checkbox'}
+		<div {if $itm['condition']}class="section hidden-field" data-condition="{json_encode($itm['condition'])|escape|trim}" {else}class="section"{/if}>
+			<span class="label">{$itm['title'][$currentLocale]|escape|trim}</span>
+			<label class="description">{$itm['description'][$currentLocale]|escape|trim}</label>
+			<ul class="checkbox_and_radiobutton">
+                {foreach from=$itm['fields'] item=$field}
+                    {assign var="uuid" value=""|uniqid|escape}
+					<li>
+						<label>
+							<input type="{$itm['type']}" id="{$field['name']}-{$uuid}" value="{$field['value']}" name="{$field['name']}"
+							       class="field {$itm['type']}{if $field['required']} required" validation="required"{else}"{/if}
+                            {if $field['selected']} checked{/if}>
+                            {$field['desc'][$currentLocale]|escape|trim}
+						</label>
+					</li>
+                {/foreach}
+			</ul>
+		</div>
     {/if}
 {/foreach}
 {/fbvFormArea}
+
+<script>
+	document.querySelectorAll('[data-condition]').forEach(field => {
+		let condition = JSON.parse(field.getAttribute('data-condition'));
+		collect(field, condition.item, condition.value);
+	});
+
+	function collect(elem, c_name, c_value) {
+		document.querySelectorAll('input[name="' + c_name + '"]').forEach(c_elem => {
+			if (c_elem) {
+				switch (c_elem.type) {
+					case  'radio':
+					case 'checkbox':
+						if (c_elem.checked && c_elem.value === '' + c_value)
+							elem.classList.remove('hidden-field');
+						c_elem.addEventListener('click', function () {
+							checkboxListener(elem, c_elem, c_value);
+						});
+						break;
+				}
+			}
+		});
+	}
+
+	function checkboxListener(elem, c_elem, c_value) {
+		if (c_elem.checked && c_elem.value === '' + c_value)
+			elem.classList.remove('hidden-field');
+		else
+			elem.classList.add('hidden-field');
+	}
+</script>

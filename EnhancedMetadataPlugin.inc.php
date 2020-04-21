@@ -12,14 +12,34 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	/* unused at the moment */
 	var $json = [
 		[
-			"name" => "enhTest2",
-			"type" => "bool",
-			"title" => ["de_DE" => "bool_test", "en_US" => "bool_test"],
-			"description" => ["de_DE" => "bool_test_desc_de", "en_US" => "bool_test_desc_en"],
+			"type" => "radio",
+			"title" =>
+				[
+					"de_DE" => "radio_test",
+					"en_US" => "radio_test"
+				],
+			"description" =>
+				[
+					"de_DE" => "radio_test_desc_de",
+					"en_US" => "radio_test_desc_en"
+				],
+			"fields" => [
+				[
+					"name" => "enhRadio",
+					"desc" => ["de_DE" => "radio description icon de", "en_US" => "radio description icon en"],
+					"value" => "one",
+				],
+				[
+					"name" => "enhRadio",
+					"desc" => ["de_DE" => "radio description icon 2 de", "en_US" => "radio description 2 icon en"],
+					"value" => "two",
+					"selected" => true
+				]
+			],
 		],
 		[
-			"name" => "enhTest",
 			"type" => "text",
+			"required" => true,
 			"title" => [
 				"de_DE" => "Beispiel Überschrift",
 				"en_US" => "Example headline"
@@ -28,9 +48,72 @@ class EnhancedMetadataPlugin extends GenericPlugin
 				"de_DE" => "Beispiel Beschreibung",
 				"en_US" => "Example description"
 			],
-			"conditions" =>
+			"fields" => [
 				[
-					"enhTest2" => true
+					"name" => "enhText",
+				]
+			],
+			"condition" =>
+				[
+					"item" => "enhRadio",
+					"value" => 'two'
+				]
+		],
+		[
+			"type" => "checkbox",
+			"title" =>
+				[
+					"de_DE" => "bool_test",
+					"en_US" => "bool_test"
+				],
+			"description" =>
+				[
+					"de_DE" => "bool_test_desc_de",
+					"en_US" => "bool_test_desc_en"
+				],
+			"fields" => [
+				[
+					"id" => "enhBool",
+					"name" => "enhBool",
+					"desc" => ["de_DE" => "bool description icon de", "en_US" => "bool description icon en"],
+					"value" => 1,
+					"required" => false,
+				],
+				[
+					"id" => "enhBool2",
+					"name" => "enhBool2",
+					"desc" => ["de_DE" => "bool description icon 2 de", "en_US" => "bool description icon 2 en"],
+					"value" => 1,
+					"required" => false,
+				]
+			],
+			"condition" =>
+				[
+					"item" => "enhRadio",
+					"value" => 'two'
+				]
+		],
+		[
+			"type" => "textarea",
+			"wysiwyg" => true,
+			"required" => false,
+			"title" => [
+				"de_DE" => "Beispiel Überschrift 2",
+				"en_US" => "Example headline 2"
+			],
+			"description" => [
+				"de_DE" => "Beispiel Beschreibung 2",
+				"en_US" => "Example description 2"
+			],
+			"fields" => [
+				[
+					"name" => "enhText2",
+				]
+			],
+			"condition" =>
+				[
+					"item" => "enhBool",
+					"value" => 1
 				]
 		]
 	];
@@ -104,7 +187,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 				$item['value'] = $smarty->get_template_vars($item['name']);
 				$formFields[] = $item;
 			}
-			var_dump($formFields);
+			/*var_dump($formFields);*/
 			$smarty->assign('formFields', $formFields);
 			$output .= $smarty->fetch($this->getTemplateResource('submissionMetaData.tpl'));
 		}
