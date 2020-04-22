@@ -15,6 +15,27 @@
 	.hidden-field {
 		display: none;
 	}
+
+	.em-inline {
+		display: inline-flex;
+		margin-right: 15px;
+	}
+
+	.em-font-weight-normal {
+		font-weight: normal !important;
+	}
+
+	.em-font-14px {
+		font-size: 14px !important;
+	}
+
+	.em-section-radio {
+
+	}
+
+	.em-margin-button-10 {
+		margin-bottom: 10px !important;
+	}
 </style>
 
 {fbvFormSection title="plugins.generic.enhanced.metadata.submission.title" class="enhanced-metadata"}
@@ -23,9 +44,10 @@
 {fbvFormArea id="enhanced-metadata-form"}
 {foreach from=$formFields item=$itm}
     {if $itm['type']=='text' || $itm['type']=='textarea'}
-		<div {if $itm['condition']}class="section hidden-field" data-condition="{json_encode($itm['condition'])|escape|trim}" {else}class="section"{/if}>
-			<label>{$itm['title'][$currentLocale]|escape|trim}{if $itm['required']}&nbsp;<span class="req">*</span>{/if}
-				<label class="description">{$itm['description'][$currentLocale]|escape|trim}</label>
+		<div {if $itm['condition']}class="section hidden-field {$itm['class']}" data-condition="{json_encode($itm['condition'])|escape|trim}"
+             {else}class="section {$itm['class']}"{/if}>
+			<label class="{$itm['title']['class']}">{$itm['title'][$currentLocale]|escape|trim}{if $itm['required']}&nbsp;<span class="req">*</span>{/if}
+				<label class="description {$itm['description']['class']}">{$itm['description'][$currentLocale]|escape|trim}</label>
                 {foreach from=$itm['fields'] item=$field}
 					<div>
                         {fbvElement type=$itm['type'] multilingual="true" id=$field['name'] value=$field['value'] rich=$itm['wysiwyg'] required=$itm['required']}
@@ -34,22 +56,41 @@
 			</label>
 		</div>
     {elseif $itm['type']=='radio' || $itm['type']=='checkbox'}
-		<div {if $itm['condition']}class="section hidden-field" data-condition="{json_encode($itm['condition'])|escape|trim}" {else}class="section"{/if}>
-			<span class="label">{$itm['title'][$currentLocale]|escape|trim}</span>
-			<label class="description">{$itm['description'][$currentLocale]|escape|trim}</label>
+		<div {if $itm['condition']}class="section hidden-field {$itm['class']}" data-condition="{json_encode($itm['condition'])|escape|trim}"
+             {else}class="section {$itm['class']}"{/if}>
+            {if $itm['title'] && $itm['title'][$currentLocale] && $itm['title'][$currentLocale]|trim != ''}
+				<span class="label {$itm['title']['class']}">{$itm['title'][$currentLocale]|escape|trim}</span>
+            {/if}
+            {if $itm['description'] && $itm['description'][$currentLocale] && $itm['description'][$currentLocale]|trim != ''}
+				<label class="description {$itm['description']['class']}">{$itm['description'][$currentLocale]|escape|trim}</label>
+            {/if}
 			<ul class="checkbox_and_radiobutton">
                 {foreach from=$itm['fields'] item=$field}
                     {assign var="uuid" value=""|uniqid|escape}
-					<li>
+					<li class="{if $itm['inline']}em-inline{/if}">
 						<label>
-							<input type="{$itm['type']}" id="{$field['name']}-{$uuid}" value="{$field['value']}" name="{$field['name']}"
-							       class="field {$itm['type']}{if $field['required']} required" validation="required"{else}"{/if}
+                            {if $itm['type']=='radio'}
+                            {assign var="itmName" value=$itm['name']}
+                            {else}
+                            {assign var="itmName" value=$field['name']}
+                            {/if}
+							<input type="{$itm['type']}" id="{$itmName}-{$uuid}" value="{$field['value']}" name="{$itmName}"
+							       class="field em-field {$itm['type']}{if $field['required']} required" validation="required"{else}"{/if}
                             {if $field['selected']} checked{/if}>
                             {$field['desc'][$currentLocale]|escape|trim}
 						</label>
 					</li>
                 {/foreach}
 			</ul>
+		</div>
+    {elseif $itm['type']=='headline'}
+		<div class="section {$itm['class']}">
+            {if $itm['title'] && $itm['title'][$currentLocale] && $itm['title'][$currentLocale]|trim != ''}
+				<label class="{$itm['title']['class']}">{$itm['title'][$currentLocale]|escape|trim}</label>
+            {/if}
+            {if $itm['description'] && $itm['description'][$currentLocale] && $itm['description'][$currentLocale]|trim != ''}
+				<p class="{$itm['description']['class']}">{$itm['description'][$currentLocale]|escape|trim}</p>
+            {/if}
 		</div>
     {/if}
 {/foreach}
