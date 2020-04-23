@@ -9,8 +9,6 @@ import('lib.pkp.classes.plugins.GenericPlugin');
 class EnhancedMetadataPlugin extends GenericPlugin
 {
 
-	/* unused at the moment */
-	var $json;
 
 	/**
 	 * @return string plugin name
@@ -53,6 +51,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			HookRegistry::register('supplementaryfilemetadataform::execute', array($this, 'submissionMetadataExecute'));
 			// Hook for save into db
 			HookRegistry::register('articledao::getLocaleFieldNames', array($this, 'addLocaleFieldNames'));
+			HookRegistry::register('articledao::getAdditionalFieldNames', array($this, 'addAdditionalFieldNames'));
 			HookRegistry::register('supplementaryfiledaodelegate::getLocaleFieldNames', array($this, 'addLocaleFieldNames'));
 		}
 		return $success;
@@ -62,6 +61,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	 * @param $hookName
 	 * @param $params
 	 * @return bool
+	 * @throws SmartyException
 	 */
 	function metadataFormDisplay($hookName, $params)
 	{
@@ -74,15 +74,8 @@ class EnhancedMetadataPlugin extends GenericPlugin
 				$form->setData('enhTest2', $submissionFile->getData('enhTest2'));
 			$templateMgr->registerFilter("output", array($this, 'supplementaryMetadataFilter'));
 		} else {
-			$this->json = json_decode(file_get_contents($this->getPluginPath() . '/submission.json'), true);
 			$smarty =& $params[1];
 			$output =& $params[2];
-			$formFields = null;
-			foreach ($this->json as $item) {
-				$item['value'] = $smarty->get_template_vars($item['name']);
-				$formFields[] = $item;
-			}
-			$smarty->assign('formFields', $formFields);
 			$output .= $smarty->fetch($this->getTemplateResource('submissionMetaData.tpl'));
 		}
 		return false;
@@ -97,15 +90,42 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	{
 		$form =& $params[0];
 		$article = null;
-		if (get_class($form) == 'SubmissionSubmitStep3Form') {
-			$article = $form->submission;
-		} elseif (get_class($form) == 'IssueEntrySubmissionReviewForm') {
-			$article = $form->getSubmission();
-		} elseif (get_class($form) == 'QuickSubmitForm') {
-			$article = $form->submission;
-		}
+		if ($form)
+			switch (get_class($form)) {
+				case 'QuickSubmitForm':
+				case 'SubmissionSubmitStep3Form':
+					$article = $form->submission;
+					break;
+				case 'IssueEntrySubmissionReviewForm':
+					$article = $form->getSubmission();
+					break;
+			}
 		if ($article) {
-			$form->setData('enhTest', $article->getData('enhTest'));
+			$json = $this->getData($this->getPluginPath() . '/submission.json');
+
+			if ($json)
+				foreach ($json as &$item) {
+					switch ($item['type']) {
+						case "radio":
+						case "select":
+							$data = $article->getData($item['name']);
+							if ($data && $item['fields'])
+								foreach ($item['fields'] as &$field) {
+									if (trim($field['value']) == trim($data))
+										$field['selected'] = true;
+									else
+										$field['selected'] = false;
+								}
+							break;
+						default:
+					}
+
+					/*					$item['value'] = $article->getData($item['name']);*/
+
+				}
+
+			$form->setData('formFields', $json);
+
 		}
 		return false;
 	}
@@ -119,13 +139,22 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	{
 		$form =& $params[0];
 		$userVars =& $params[1];
-		if (get_class($form) == 'SubmissionSubmitStep3Form' ||
-			get_class($form) == 'IssueEntrySubmissionReviewForm' ||
-			get_class($form) == 'QuickSubmitForm') {
-			$userVars[] = 'enhTest';
-		} else if (get_class($form) == 'SupplementaryFileMetadataForm') {
-			$userVars[] = 'enhTest2';
-		}
+		if ($form)
+			switch (get_class($form)) {
+				case 'QuickSubmitForm':
+				case 'SubmissionSubmitStep3Form':
+				case 'IssueEntrySubmissionReviewForm':
+					$json = $this->getData($this->getPluginPath() . '/submission.json');
+					$names = [];
+					if ($json)
+						$names = $this->getNameParam($json);
+					foreach ($names as $name)
+						$userVars[] = $name;
+					break;
+				case 'SupplementaryFileMetadataForm':
+					$userVars[] = 'enhTest2';
+					break;
+			}
 		return false;
 	}
 
@@ -151,8 +180,13 @@ class EnhancedMetadataPlugin extends GenericPlugin
 				$submissionFile = $form->getSubmissionFile();
 				break;
 		}
-		if ($article != null)
-			$article->setData('enhTest', $form->getData('enhTest'));
+		if ($article != null) {
+			$json = $this->getData($this->getPluginPath() . '/submission.json');
+			if ($json)
+				$names = $this->getNameParam($json);
+			foreach ($names as $name)
+				$article->setData($name, $form->getData($name));
+		}
 		if ($submissionFile != null) {
 			$submissionFile->setData('enhTest2', $form->getData('enhTest2'));
 		}
@@ -170,7 +204,36 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		switch (get_class($form)) {
 			case 'ArticleDAO':
 				$fields =& $params[1];
-				$fields[] = 'enhTest';
+				$json = $this->getData($this->getPluginPath() . '/submission.json');
+				if ($json)
+					$names = $this->getLocaleNameParam($json);
+				foreach ($names as $name)
+					$fields[] = $name;
+				break;
+			case 'SupplementaryFileDAODelegate':
+				$fields =& $params[1];
+				$fields[] = 'enhTest2';
+				break;
+		}
+		return false;
+	}
+
+	/**
+	 * @param $hookName
+	 * @param $params
+	 * @return bool
+	 */
+	function addAdditionalFieldNames($hookName, $params)
+	{
+		$form =& $params[0];
+		switch (get_class($form)) {
+			case 'ArticleDAO':
+				$fields =& $params[1];
+				$json = $this->getData($this->getPluginPath() . '/submission.json');
+				if ($json)
+					$names = $this->getAdditionalNameParam($json);
+				foreach ($names as $name)
+					$fields[] = $name;
 				break;
 			case 'SupplementaryFileDAODelegate':
 				$fields =& $params[1];
@@ -192,6 +255,62 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			$templateMgr->unregisterFilter('output', array($this, 'supplementaryMetadataFilter'));
 		}
 		return $output;
+	}
+
+	function getData($name)
+	{
+		return json_decode(file_get_contents($name), true);
+	}
+
+	function getNameParam($data)
+	{
+		$res = [];
+		foreach ($data as $itm) {
+			switch ($itm['type']) {
+				case 'select':
+				case 'radio':
+					$res[] = $itm['name'];
+					break;
+				default:
+					if ($itm['fields'])
+						foreach ($itm['fields'] as $field)
+							$res[] = $field['name'];
+			}
+		}
+		return array_unique($res);
+	}
+
+	function getLocaleNameParam($data)
+	{
+		$res = [];
+		foreach ($data as $itm) {
+			switch ($itm['type']) {
+				case 'textarea':
+				case 'text':
+					if ($itm['fields'])
+						foreach ($itm['fields'] as $field)
+							$res[] = $field['name'];
+			}
+		}
+		return array_unique($res);
+	}
+
+	function getAdditionalNameParam($data)
+	{
+		$res = [];
+		foreach ($data as $itm) {
+			switch ($itm['type']) {
+				case 'radio':
+					$res[] = $itm['name'];
+					break;
+				case !'textarea':
+				case !'text':
+					if ($itm['fields'])
+						foreach ($itm['fields'] as $field)
+							$res[] = $field['name'];
+			}
+		}
+		return array_unique($res);
 	}
 
 
