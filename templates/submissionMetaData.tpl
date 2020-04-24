@@ -42,7 +42,7 @@
 	<p class="description">{translate key="plugins.generic.enhanced.metadata.submission.description"}</p>
 {/fbvFormSection}
 {fbvFormArea id="enhanced-metadata-form"}
-{foreach from=$formFields item=$itm}
+{foreach from=$enhFormFields item=$itm}
     {if $itm['type']=='text' || $itm['type']=='textarea'}
 		<div {if $itm['condition']}class="section hidden-field {$itm['class']}" data-condition="{json_encode($itm['condition'])|escape|trim}"
              {else}class="section {$itm['class']}"{/if}>
@@ -50,7 +50,8 @@
 				<label class="description {$itm['description']['class']}">{$itm['description'][$currentLocale]|escape|trim}</label>
                 {foreach from=$itm['fields'] item=$field}
 					<div>
-                        {fbvElement type=$itm['type'] multilingual="true" id=$field['name'] value=$field['value'] rich=$itm['wysiwyg'] required=$itm['required']}
+                        {fbvElement type=$itm['type'] multilingual=$field['multilingual'] id=$field['name'] value=$enhMetaDataJson[$field['name']] rich=$field['rich']
+                        required=$field['required'] maxlength=$field['maxLength'] class=$field['class']}
 					</div>
                 {/foreach}
 			</label>
@@ -75,8 +76,8 @@
                             {assign var="itmName" value=$field['name']}
                             {/if}
 							<input type="{$itm['type']}" id="{$itmName}-{$uuid}" value="{$field['value']}" name="{$itmName}"
-							       class="field em-field {$itm['type']}{if $field['required']} required" validation="required"{else}"{/if}
-                            {if $field['selected']} checked{/if}>
+							       class="field {$field['class']} {$itm['type']}{if $field['required']} required" validation="required"{else}"{/if}
+                            {if $field['value'] == $enhMetaDataJson[$itmName]} checked{elseif !$enhMetaDataJson[$itmName] && $field['selected']}checked{/if}>
                             {$field['desc'][$currentLocale]|escape|trim}
 						</label>
 					</li>

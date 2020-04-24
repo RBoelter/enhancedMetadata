@@ -1,5 +1,6 @@
 <?php
 import('lib.pkp.classes.plugins.GenericPlugin');
+import('lib.pkp.classes.form.validation.FormValidatorLength');
 
 /**
  * Class EnhancedMetadataPlugin
@@ -45,12 +46,13 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			HookRegistry::register('quicksubmitform::readuservars', array($this, 'addUserVars'));
 			HookRegistry::register('supplementaryfilemetadataform::readuservars', array($this, 'addUserVars'));
 			// Hook for save into forms
+			HookRegistry::register('submissionsubmitstep3form::validate', array($this, 'submissionMetadataValidate'));
+
 			HookRegistry::register('submissionsubmitstep3form::execute', array($this, 'submissionMetadataExecute'));
 			HookRegistry::register('issueentrysubmissionreviewform::execute', array($this, 'submissionMetadataExecute'));
 			HookRegistry::register('quicksubmitform::execute', array($this, 'submissionMetadataExecute'));
 			HookRegistry::register('supplementaryfilemetadataform::execute', array($this, 'submissionMetadataExecute'));
 			// Hook for save into db
-			HookRegistry::register('articledao::getLocaleFieldNames', array($this, 'addLocaleFieldNames'));
 			HookRegistry::register('articledao::getAdditionalFieldNames', array($this, 'addAdditionalFieldNames'));
 			HookRegistry::register('supplementaryfiledaodelegate::getLocaleFieldNames', array($this, 'addLocaleFieldNames'));
 		}
@@ -101,31 +103,20 @@ class EnhancedMetadataPlugin extends GenericPlugin
 					break;
 			}
 		if ($article) {
-			$json = $this->getData($this->getPluginPath() . '/submission.json');
-
-			if ($json)
-				foreach ($json as &$item) {
-					switch ($item['type']) {
-						case "radio":
-						case "select":
-							$data = $article->getData($item['name']);
-							if ($data && $item['fields'])
-								foreach ($item['fields'] as &$field) {
-									if (trim($field['value']) == trim($data))
-										$field['selected'] = true;
-									else
-										$field['selected'] = false;
-								}
-							break;
-						default:
+			$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
+			if ($jsonSchema && $jsonSchema['items']) {
+				$version = $jsonSchema['version'];
+				if ($version && intval($version) && $version > 0) {
+					$json = null;
+					do {
+						$json = $article->getData('enhMetaDataJson_' . $version--);
+					} while ($json == null && $version > 0);
+					if ($json) {
+						$form->setData('enhFormFields', $jsonSchema['items']);
+						$form->setData('enhMetaDataJson', json_decode($json, true));
 					}
-
-					/*					$item['value'] = $article->getData($item['name']);*/
-
 				}
-
-			$form->setData('formFields', $json);
-
+			}
 		}
 		return false;
 	}
@@ -144,18 +135,34 @@ class EnhancedMetadataPlugin extends GenericPlugin
 				case 'QuickSubmitForm':
 				case 'SubmissionSubmitStep3Form':
 				case 'IssueEntrySubmissionReviewForm':
-					$json = $this->getData($this->getPluginPath() . '/submission.json');
-					$names = [];
-					if ($json)
-						$names = $this->getNameParam($json);
-					foreach ($names as $name)
-						$userVars[] = $name;
+					$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
+					if ($jsonSchema && $jsonSchema['items']) {
+						$names = $this->getNameParam($jsonSchema['items']);
+						$this->addChecks($form, $jsonSchema['items']);
+						foreach ($names as $name)
+							$userVars[] = $name;
+					}
 					break;
 				case 'SupplementaryFileMetadataForm':
 					$userVars[] = 'enhTest2';
 					break;
 			}
 		return false;
+	}
+
+	function submissionMetadataValidate($hookName, $params)
+	{
+		$form =& $params[0];
+		$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
+		if ($jsonSchema && $jsonSchema['items']) {
+			$names = $this->getNameParam($jsonSchema['items']);
+			$enhData = [];
+			foreach ($names as $name) {
+				$enhData[$name] = $form->getData($name);
+			}
+			$form->setData('enhMetaDataJson', $enhData);
+			$form->setData('enhFormFields', $jsonSchema['items']);
+		}
 	}
 
 	/**
@@ -181,11 +188,15 @@ class EnhancedMetadataPlugin extends GenericPlugin
 				break;
 		}
 		if ($article != null) {
-			$json = $this->getData($this->getPluginPath() . '/submission.json');
-			if ($json)
-				$names = $this->getNameParam($json);
-			foreach ($names as $name)
-				$article->setData($name, $form->getData($name));
+			$enhData = [];
+			$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
+			if ($jsonSchema && $jsonSchema['items']) {
+				$names = $this->getNameParam($jsonSchema['items']);
+				foreach ($names as $name) {
+					$enhData[$name] = $form->getData($name);
+				}
+			}
+			$article->setData('enhMetaDataJson_' . $jsonSchema['version'], json_encode($enhData));
 		}
 		if ($submissionFile != null) {
 			$submissionFile->setData('enhTest2', $form->getData('enhTest2'));
@@ -193,30 +204,6 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		return false;
 	}
 
-	/**
-	 * @param $hookName
-	 * @param $params
-	 * @return bool
-	 */
-	function addLocaleFieldNames($hookName, $params)
-	{
-		$form =& $params[0];
-		switch (get_class($form)) {
-			case 'ArticleDAO':
-				$fields =& $params[1];
-				$json = $this->getData($this->getPluginPath() . '/submission.json');
-				if ($json)
-					$names = $this->getLocaleNameParam($json);
-				foreach ($names as $name)
-					$fields[] = $name;
-				break;
-			case 'SupplementaryFileDAODelegate':
-				$fields =& $params[1];
-				$fields[] = 'enhTest2';
-				break;
-		}
-		return false;
-	}
 
 	/**
 	 * @param $hookName
@@ -226,18 +213,12 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	function addAdditionalFieldNames($hookName, $params)
 	{
 		$form =& $params[0];
+		$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
 		switch (get_class($form)) {
 			case 'ArticleDAO':
-				$fields =& $params[1];
-				$json = $this->getData($this->getPluginPath() . '/submission.json');
-				if ($json)
-					$names = $this->getAdditionalNameParam($json);
-				foreach ($names as $name)
-					$fields[] = $name;
-				break;
 			case 'SupplementaryFileDAODelegate':
 				$fields =& $params[1];
-				$fields[] = 'enhTest2';
+				$fields[] = 'enhMetaDataJson_' . $jsonSchema['version'];
 				break;
 		}
 		return false;
@@ -257,9 +238,24 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		return $output;
 	}
 
-	function getData($name)
+	function getJsonScheme($name)
 	{
 		return json_decode(file_get_contents($name), true);
+	}
+
+	function addChecks($form, $data)
+	{
+		foreach ($data as $itm) {
+			if ($itm['fields'])
+				foreach ($itm['fields'] as $field)
+					switch ($itm['type']) {
+						case 'text':
+						case 'textarea';
+							$form->addCheck(new FormValidatorLength($form, $field['name'] . '[en_US]', 'optional', 'user.register.form.passwordLengthRestriction', '<=', $field['maxLength']));
+							break;
+					}
+
+		}
 	}
 
 	function getNameParam($data)
@@ -279,39 +275,5 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		}
 		return array_unique($res);
 	}
-
-	function getLocaleNameParam($data)
-	{
-		$res = [];
-		foreach ($data as $itm) {
-			switch ($itm['type']) {
-				case 'textarea':
-				case 'text':
-					if ($itm['fields'])
-						foreach ($itm['fields'] as $field)
-							$res[] = $field['name'];
-			}
-		}
-		return array_unique($res);
-	}
-
-	function getAdditionalNameParam($data)
-	{
-		$res = [];
-		foreach ($data as $itm) {
-			switch ($itm['type']) {
-				case 'radio':
-					$res[] = $itm['name'];
-					break;
-				case !'textarea':
-				case !'text':
-					if ($itm['fields'])
-						foreach ($itm['fields'] as $field)
-							$res[] = $field['name'];
-			}
-		}
-		return array_unique($res);
-	}
-
 
 }
