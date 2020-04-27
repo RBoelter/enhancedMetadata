@@ -32,10 +32,29 @@
 	.em-section-radio {
 
 	}
-
-	.em-margin-button-10 {
+	.em-margin-bottom-60 {
+		margin-bottom: 60px !important;
+	}
+	.em-margin-bottom-10 {
 		margin-bottom: 10px !important;
 	}
+
+	.em-text-center{
+		text-align: center;
+	}
+
+	.em-font-italic{
+		font-style: italic;
+	}
+
+	.em-border-bottom{
+		border-bottom: 1px solid black;
+	}
+
+	.em-margin-left{
+		margin-left: 20px;
+	}
+
 </style>
 
 {fbvFormSection title="plugins.generic.enhanced.metadata.submission.title" class="enhanced-metadata"}
@@ -60,7 +79,7 @@
 		<div {if $itm['condition']}class="section hidden-field {$itm['class']}" data-condition="{json_encode($itm['condition'])|escape|trim}"
              {else}class="section {$itm['class']}"{/if}>
             {if $itm['title'] && $itm['title'][$currentLocale] && $itm['title'][$currentLocale]|trim != ''}
-				<span class="label {$itm['title']['class']}">{$itm['title'][$currentLocale]|escape|trim}</span>
+				<span class="label {$itm['title']['class']}">{$itm['title'][$currentLocale]|trim}</span>
             {/if}
             {if $itm['description'] && $itm['description'][$currentLocale] && $itm['description'][$currentLocale]|trim != ''}
 				<label class="description {$itm['description']['class']}">{$itm['description'][$currentLocale]|escape|trim}</label>
@@ -109,8 +128,10 @@
 				switch (c_elem.type) {
 					case  'radio':
 					case 'checkbox':
-						if (c_elem.checked && c_elem.value === '' + c_value)
+						if (c_elem.checked && c_elem.value === '' + c_value) {
 							elem.classList.remove('hidden-field');
+							elem.classList.add('em-margin-left');
+						}
 						c_elem.addEventListener('click', function () {
 							checkboxListener(elem, c_elem, c_value);
 						});
@@ -121,9 +142,13 @@
 	}
 
 	function checkboxListener(elem, c_elem, c_value) {
-		if (c_elem.checked && c_elem.value === '' + c_value)
+		if (c_elem.checked && c_elem.value === '' + c_value) {
 			elem.classList.remove('hidden-field');
-		else
+			elem.classList.add('em-margin-left');
+		}
+		else {
 			elem.classList.add('hidden-field');
+			elem.classList.remove('em-margin-left');
+		}
 	}
 </script>
