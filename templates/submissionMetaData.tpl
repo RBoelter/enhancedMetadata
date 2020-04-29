@@ -11,8 +11,49 @@
  *
  *}
 
+<script>
+	document.querySelectorAll('[data-condition]').forEach(field => {
+		let condition = JSON.parse(field.getAttribute('data-condition'));
+		collect(field, condition.item, condition.value);
+	});
+
+	function collect(elem, c_name, c_value) {
+		document.querySelectorAll('input[name="' + c_name + '"]').forEach(c_elem => {
+			if (c_elem) {
+				switch (c_elem.type) {
+					case  'radio':
+					case 'checkbox':
+						if (c_elem.checked && c_elem.value === '' + c_value) {
+							elem.classList.remove('em-hidden-field');
+							elem.classList.add('em-margin-left');
+						}
+						c_elem.addEventListener('click', function () {
+							checkboxListener(elem, c_elem, c_value);
+						});
+						break;
+				}
+			}
+		});
+	}
+
+	function checkboxListener(elem, c_elem, c_value) {
+		if (c_elem.checked && c_elem.value === '' + c_value) {
+			elem.classList.remove('em-hidden-field');
+			elem.classList.add('em-margin-left');
+		} else {
+			elem.classList.add('em-hidden-field');
+			elem.classList.remove('em-margin-left');
+			elem.querySelectorAll('input').forEach(itm => itm.value = '');
+		}
+	}
+
+	document.querySelectorAll('.checkNum').forEach(function (el) {ldelim}
+		el.addEventListener("input", elem => el.value = (isNaN(el.value)) ? el.value.replace(elem.data, '') : el.value);
+        {rdelim})
+</script>
+
 <style>
-	.hidden-field {
+	.em-hidden-field {
 		display: none;
 	}
 
@@ -22,7 +63,7 @@
 	}
 
 	.em-font-weight-normal {
-		font-weight: normal !important;
+		/*font-weight: normal !important;*/
 	}
 
 	.em-font-14px {
@@ -32,26 +73,28 @@
 	.em-section-radio {
 
 	}
-	.em-margin-bottom-60 {
+
+	.em-margin-bottom-2 {
 		margin-bottom: 60px !important;
 	}
-	.em-margin-bottom-10 {
+
+	.em-margin-bottom-1 {
 		margin-bottom: 10px !important;
 	}
 
-	.em-text-center{
+	.em-text-center {
 		text-align: center;
 	}
 
-	.em-font-italic{
+	.em-font-italic {
 		font-style: italic;
 	}
 
-	.em-border-bottom{
+	.em-border-bottom {
 		border-bottom: 1px solid black;
 	}
 
-	.em-margin-left{
+	.em-margin-left {
 		margin-left: 20px;
 	}
 
@@ -63,20 +106,25 @@
 {fbvFormArea id="enhanced-metadata-form"}
 {foreach from=$enhFormFields item=$itm}
     {if $itm['type']=='text' || $itm['type']=='textarea'}
-		<div {if $itm['condition']}class="section hidden-field {$itm['class']}" data-condition="{json_encode($itm['condition'])|escape|trim}"
+		<div {if $itm['condition']}class="section em-hidden-field {$itm['class']}" data-condition="{json_encode($itm['condition'])|escape|trim}"
              {else}class="section {$itm['class']}"{/if}>
 			<label class="{$itm['title']['class']}">{$itm['title'][$currentLocale]|escape|trim}{if $itm['required']}&nbsp;<span class="req">*</span>{/if}
 				<label class="description {$itm['description']['class']}">{$itm['description'][$currentLocale]|escape|trim}</label>
                 {foreach from=$itm['fields'] item=$field}
-					<div>
-                        {fbvElement type=$itm['type'] multilingual=$field['multilingual'] id=$field['name'] value=$enhMetaDataJson[$field['name']] rich=$field['rich']
-                        required=$field['required'] maxlength=$field['maxLength'] class=$field['class']}
-					</div>
+                    {if !$field['size'] || $field['size']|upper == 'LARGE'}
+                        {assign var="fbvSize" value=$fbvStyles.size.LARGE}
+                    {elseif $field['size']|upper == 'MEDIUM'}
+                        {assign var="fbvSize" value=$fbvStyles.size.MEDIUM}
+                    {elseif $field['size']|upper == 'SMALL'}
+                        {assign var="fbvSize" value=$fbvStyles.size.SMALL}
+                    {/if}
+                    {fbvElement type=$itm['type'] multilingual=$field['multilingual'] id=$field['name'] value=$enhMetaDataJson[$field['name']] rich=$field['rich']
+                    required=$field['required'] maxlength=$field['maxLength'] class=$field['class'] size=$fbvSize}
                 {/foreach}
 			</label>
 		</div>
     {elseif $itm['type']=='radio' || $itm['type']=='checkbox'}
-		<div {if $itm['condition']}class="section hidden-field {$itm['class']}" data-condition="{json_encode($itm['condition'])|escape|trim}"
+		<div {if $itm['condition']}class="section em-hidden-field {$itm['class']}" data-condition="{json_encode($itm['condition'])|escape|trim}"
              {else}class="section {$itm['class']}"{/if}>
             {if $itm['title'] && $itm['title'][$currentLocale] && $itm['title'][$currentLocale]|trim != ''}
 				<span class="label {$itm['title']['class']}">{$itm['title'][$currentLocale]|trim}</span>
@@ -115,40 +163,3 @@
     {/if}
 {/foreach}
 {/fbvFormArea}
-
-<script>
-	document.querySelectorAll('[data-condition]').forEach(field => {
-		let condition = JSON.parse(field.getAttribute('data-condition'));
-		collect(field, condition.item, condition.value);
-	});
-
-	function collect(elem, c_name, c_value) {
-		document.querySelectorAll('input[name="' + c_name + '"]').forEach(c_elem => {
-			if (c_elem) {
-				switch (c_elem.type) {
-					case  'radio':
-					case 'checkbox':
-						if (c_elem.checked && c_elem.value === '' + c_value) {
-							elem.classList.remove('hidden-field');
-							elem.classList.add('em-margin-left');
-						}
-						c_elem.addEventListener('click', function () {
-							checkboxListener(elem, c_elem, c_value);
-						});
-						break;
-				}
-			}
-		});
-	}
-
-	function checkboxListener(elem, c_elem, c_value) {
-		if (c_elem.checked && c_elem.value === '' + c_value) {
-			elem.classList.remove('hidden-field');
-			elem.classList.add('em-margin-left');
-		}
-		else {
-			elem.classList.add('hidden-field');
-			elem.classList.remove('em-margin-left');
-		}
-	}
-</script>

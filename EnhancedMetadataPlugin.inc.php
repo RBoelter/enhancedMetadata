@@ -112,9 +112,9 @@ class EnhancedMetadataPlugin extends GenericPlugin
 						$json = $article->getData('enhMetaDataJson_' . $version--);
 					} while ($json == null && $version > 0);
 					if ($json) {
-						$form->setData('enhFormFields', $jsonSchema['items']);
 						$form->setData('enhMetaDataJson', json_decode($json, true));
 					}
+					$form->setData('enhFormFields', $jsonSchema['items']);
 				}
 			}
 		}

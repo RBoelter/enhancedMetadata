@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "form": "submission",
   "items": [
 	{
 	  "type": "headline",
@@ -78,7 +79,8 @@
 		  "rich": true,
 		  "multilingual": false,
 		  "required": false,
-		  "class": "example-class ..."
+		  "class": "example-class ...",
+		  "size": "large"
 		}
 	  ],
 	  "condition": {
@@ -142,7 +144,8 @@
 		  "maxLength": 500,
 		  "multilingual": false,
 		  "required": false,
-		  "class": "example-class ..."
+		  "class": "example-class ...",
+		  "size": "small"
 		}
 	  ],
 	  "condition": {

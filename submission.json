@@ -1,9 +1,492 @@
 {
   "version": 2,
+  "form": "submission",
   "items": [
 	{
+	  "type": "radio",
+	  "inline": false,
+	  "name": "en_paper-26",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Paper Type"
+	  },
+	  "description": {
+		"class": "em-font-14px",
+		"en_US": "Your paper may (or may not) also belong to a specific paper type. You can only select one."
+	  },
+	  "fields": [
+		{
+		  "desc": {
+			"en_US": "None of these"
+		  },
+		  "value": "None of these",
+		  "selected": true
+		},
+		{
+		  "desc": {
+			"en_US": "Cumulative Blitz Report"
+		  },
+		  "value": "Cumulative Blitz Report"
+		},
+		{
+		  "desc": {
+			"en_US": "Insights and Ideas"
+		  },
+		  "value": "Insights and Ideas"
+		},
+		{
+		  "desc": {
+			"en_US": "Registered Report"
+		  },
+		  "value": "Registered Report"
+		},
+		{
+		  "desc": {
+			"en_US": "Replication"
+		  },
+		  "value": "Replication"
+		}
+	  ]
+	},
+	{
+	  "type": "radio",
+	  "inline": false,
+	  "name": "en_paper-25",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Solicitation"
+	  },
+	  "description": {
+		"class": "em-font-14px",
+		"en_US": "Please select how you are submitting this paper (specifically, whether it was solicited or not)."
+	  },
+	  "fields": [
+		{
+		  "desc": {
+			"en_US": "Uninvited"
+		  },
+		  "value": "Uninvited",
+		  "selected": true
+		},
+		{
+		  "desc": {
+			"en_US": "Invited"
+		  },
+		  "value": "Invited"
+		},
+		{
+		  "desc": {
+			"en_US": "Invited to a \"Theme Bundle\""
+		  },
+		  "value": "Theme Bundle"
+		},
+		{
+		  "desc": {
+			"en_US": "Invited to a \"Controversy Exchange\""
+		  },
+		  "value": "Controversy Exchange"
+		}
+	  ]
+	},
+	{
+	  "type": "text",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "If your paper was invited, then please enter the editor that invited you:"
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-24",
+		  "maxLength": 100
+		}
+	  ],
+	  "condition": {
+		"item": "en_paper-25",
+		"value": "Invited"
+	  }
+	},
+	{
+	  "type": "radio",
+	  "inline": true,
+	  "name": "en_paper-23",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Has the paper been previously submitted to, and rejected from, <span style=\"font-style: italic;\">Personality Science</span>?"
+	  },
+	  "fields": [
+		{
+		  "desc": {
+			"en_US": "Yes"
+		  },
+		  "value": "Y"
+		},
+		{
+		  "desc": {
+			"en_US": "No"
+		  },
+		  "value": "N"
+		},
+		{
+		  "desc": {
+			"en_US": "N/A"
+		  },
+		  "value": "NA",
+		  "selected": true
+		}
+	  ]
+	},
+	{
+	  "type": "text",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "If Yes, please provide its Paper ID Number here: "
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-22",
+		  "maxLength": 100
+		}
+	  ],
+	  "condition": {
+		"item": "en_paper-23",
+		"value": "Y"
+	  }
+	},
+	{
 	  "type": "headline",
-	  "class": "em-margin-bottom-10 em-border-bottom",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"en_US": "Basic Parameters of the Paper"
+	  },
+	  "description": {
+		"en_US": ""
+	  }
+	},
+	{
+	  "type": "text",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Word count of the abstract (max. 150 words):"
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-21",
+		  "size": "small",
+		  "maxLength": 3,
+		  "class": "checkNum"
+		}
+	  ]
+	},
+	{
+	  "type": "text",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Word count of the main text (excluding abstract, references, tables, figures):"
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-20",
+		  "size": "small",
+		  "maxLength": 3,
+		  "class": "checkNum"
+		}
+	  ]
+	},
+	{
+	  "type": "text",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Number of pages:"
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-19",
+		  "size": "small",
+		  "maxLength": 3,
+		  "class": "checkNum"
+		}
+	  ]
+	},
+	{
+	  "type": "text",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Number of references:"
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-18",
+		  "size": "small",
+		  "maxLength": 3,
+		  "class": "checkNum"
+		}
+	  ]
+	},
+	{
+	  "type": "text",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Number of tables:"
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-17",
+		  "size": "small",
+		  "maxLength": 3,
+		  "class": "checkNum"
+		}
+	  ]
+	},
+	{
+	  "type": "text",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Number of figures:"
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-16",
+		  "size": "small",
+		  "maxLength": 3,
+		  "class": "checkNum"
+		}
+	  ]
+	},
+	{
+	  "type": "radio",
+	  "inline": true,
+	  "name": "en_paper-15",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Do the word count, number of references, number of tables, and/or number of figures exceed the recommended limits listed at xxx ?"
+	  },
+	  "fields": [
+		{
+		  "desc": {
+			"en_US": "Yes"
+		  },
+		  "value": "Y"
+		},
+		{
+		  "desc": {
+			"en_US": "No"
+		  },
+		  "value": "N"
+		},
+		{
+		  "desc": {
+			"en_US": "N/A"
+		  },
+		  "value": "NA",
+		  "selected": true
+		}
+	  ]
+	},
+	{
+	  "type": "text",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "If Yes, please specify and provide justifications:"
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-14",
+		  "maxLength": 100
+		}
+	  ],
+	  "condition": {
+		"item": "en_paper-15",
+		"value": "Y"
+	  }
+	},
+	{
+	  "type": "radio",
+	  "inline": true,
+	  "name": "en_paper-13",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Does any part of your paper report original or new analyses of empirical (qualitative or quantitative) data (regardless of whether the data are new or have already been used elsewhere)?"
+	  },
+	  "fields": [
+		{
+		  "desc": {
+			"en_US": "Yes"
+		  },
+		  "value": "Y"
+		},
+		{
+		  "desc": {
+			"en_US": "No"
+		  },
+		  "value": "N"
+		},
+		{
+		  "desc": {
+			"en_US": "N/A"
+		  },
+		  "value": "NA",
+		  "selected": true
+		}
+	  ]
+	},
+	{
+	  "type": "radio",
+	  "inline": true,
+	  "name": "en_paper-12",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Have the data, or parts of it, already been published?"
+	  },
+	  "fields": [
+		{
+		  "desc": {
+			"en_US": "Yes"
+		  },
+		  "value": "Y"
+		},
+		{
+		  "desc": {
+			"en_US": "No"
+		  },
+		  "value": "N"
+		},
+		{
+		  "desc": {
+			"en_US": "N/A"
+		  },
+		  "value": "NA",
+		  "selected": true
+		}
+	  ]
+	},
+	{
+	  "type": "text",
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "If Yes, please explain why and how the data are reused:"
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-11",
+		  "maxLength": 100
+		}
+	  ],
+	  "condition": {
+		"item": "en_paper-12",
+		"value": "Y"
+	  }
+	},
+	{
+	  "type": "checkbox",
+	  "inline": false,
+	  "class": "em-margin-bottom-1",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "What kinds of data were gathered? Please indicate all that apply."
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-10",
+		  "desc": {
+			"en_US": "Quantitative"
+		  },
+		  "value": 1
+		},
+		{
+		  "name": "en_paper-9",
+		  "desc": {
+			"en_US": "Qualitative"
+		  },
+		  "value": 1
+		},
+		{
+		  "name": "en_paper-8",
+		  "desc": {
+			"en_US": "Mixed-Method"
+		  },
+		  "value": 1
+		},
+		{
+		  "name": "en_paper-7",
+		  "desc": {
+			"en_US": "Other"
+		  },
+		  "value": 1
+		}
+	  ]
+	},
+	{
+	  "type": "checkbox",
+	  "inline": false,
+	  "class": "em-margin-bottom-2",
+	  "title": {
+		"class": "em-font-weight-normal em-font-14px",
+		"en_US": "Which design(s) was (were) used? Please indicate all that apply. "
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-6",
+		  "desc": {
+			"en_US": "Cross-sectional"
+		  },
+		  "value": 1
+		},
+		{
+		  "name": "en_paper-5",
+		  "desc": {
+			"en_US": "Longitudinal"
+		  },
+		  "value": 1
+		},
+		{
+		  "name": "en_paper-4",
+		  "desc": {
+			"en_US": "Experimental"
+		  },
+		  "value": 1
+		},
+		{
+		  "name": "en_paper-3",
+		  "desc": {
+			"en_US": "Quasi-experimental"
+		  },
+		  "value": 1
+		},
+		{
+		  "name": "en_paper-2",
+		  "desc": {
+			"en_US": "Case Study"
+		  },
+		  "value": 1
+		},
+		{
+		  "name": "en_paper-1",
+		  "desc": {
+			"en_US": "Other"
+		  },
+		  "value": 1
+		}
+	  ]
+	},
+	{
+	  "type": "headline",
+	  "class": "em-margin-bottom-1 em-border-bottom",
 	  "title": {
 		"class": "em-text-center ",
 		"en_US": "BEST PRACTICE IN REPORTING STANDARDS"
@@ -13,7 +496,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-1",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Does any part of the paper report QUANTITATIVE WORK (excluding meta-analyses)?"
@@ -44,7 +527,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-2",
-	  "class": "em-margin-bottom-10 em-margin-left",
+	  "class": "em-margin-bottom-1 em-margin-left",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "If Yes, does the paper follow relevant APA reporting standards (JARS, Table 1-5: <a href=\"https://www.apa.org/pubs/journals/releases/amp-amp0000191.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.apa.org/pubs/journals/releases/amp-amp0000191.pdf</a>)?"
@@ -79,7 +562,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-3",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Does any part of the paper report a META-ANALYSIS?"
@@ -110,7 +593,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-4",
-	  "class": "em-margin-bottom-10 em-margin-left",
+	  "class": "em-margin-bottom-1 em-margin-left",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "If Yes, does the paper follow relevant APA reporting standards (MARS, Table 9: <a href=\"https://www.apa.org/pubs/journals/releases/amp-amp0000191.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.apa.org/pubs/journals/releases/amp-amp0000191.pdf</a>)?"
@@ -145,7 +628,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-5",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Does any part of the paper report a REPLICATION?"
@@ -176,7 +659,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-6",
-	  "class": "em-margin-bottom-10 em-margin-left",
+	  "class": "em-margin-bottom-1 em-margin-left",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "If Yes, does the paper follow relevant APA reporting standards (JARS, Table 6: <a href=\"https://www.apa.org/pubs/journals/releases/amp-amp0000191.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.apa.org/pubs/journals/releases/amp-amp0000191.pdf</a>)?"
@@ -211,7 +694,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-7",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Does any part of the paper report STRUCTURAL EQUATION MODELING?"
@@ -242,7 +725,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-8",
-	  "class": "em-margin-bottom-10 em-margin-left",
+	  "class": "em-margin-bottom-1 em-margin-left",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "If Yes, does the paper follow relevant APA reporting standards (JARS, Table 7: <a href=\"https://www.apa.org/pubs/journals/releases/amp-amp0000191.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.apa.org/pubs/journals/releases/amp-amp0000191.pdf</a>)?"
@@ -277,7 +760,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-9",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Does any part of the paper report BAYESIAN ANALYSES?"
@@ -308,7 +791,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-10",
-	  "class": "em-margin-bottom-10 em-margin-left",
+	  "class": "em-margin-bottom-1 em-margin-left",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "If Yes, does the paper follow relevant APA reporting standards (JARS, Table 8: <a href=\"https://www.apa.org/pubs/journals/releases/amp-amp0000191.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.apa.org/pubs/journals/releases/amp-amp0000191.pdf</a>)?"
@@ -343,7 +826,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-11",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Does any part of the paper report primary QUALITATIVE RESEARCH (excluding meta-analyses)?"
@@ -374,7 +857,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-12",
-	  "class": "em-margin-bottom-10 em-margin-left",
+	  "class": "em-margin-bottom-1 em-margin-left",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "If Yes, does the paper follow relevant APA reporting standards (JARS-Qual, Table 1: <a href=\"https://www.apa.org/pubs/journals/releases/amp-amp0000151.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.apa.org/pubs/journals/releases/amp-amp0000151.pdf</a>)?"
@@ -409,7 +892,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-13",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Does any part of the paper report a QUALITATIVE META-ANALYSIS?"
@@ -440,7 +923,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-14",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "If Yes, does the paper follow relevant APA reporting standards (QMARS, Table 2: <a href=\"https://www.apa.org/pubs/journals/releases/amp-amp0000151.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.apa.org/pubs/journals/releases/amp-amp0000151.pdf</a>)?"
@@ -475,7 +958,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-15",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Does any part of the paper report the collection and integration of quantitative and qualitative data?"
@@ -506,7 +989,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en-bp-16",
-	  "class": "em-margin-bottom-60",
+	  "class": "em-margin-bottom-2",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "If Yes, does the paper follow relevant APA reporting standards (MMARS, Table 3: <a href=\"https://www.apa.org/pubs/journals/releases/amp-amp0000151.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.apa.org/pubs/journals/releases/amp-amp0000151.pdf</a>)?"
@@ -539,7 +1022,7 @@
 	},
 	{
 	  "type": "headline",
-	  "class": "em-margin-bottom-60",
+	  "class": "em-margin-bottom-2",
 	  "title": {
 		"class": "em-text-center ",
 		"en_US": "OPENNESS AND TRANSPARENCY IMPLEMENTATIONS"
@@ -551,7 +1034,7 @@
 	},
 	{
 	  "type": "headline",
-	  "class": "em-margin-bottom-10 em-border-bottom",
+	  "class": "em-margin-bottom-1 em-border-bottom",
 	  "title": {
 		"class": "em-text-center ",
 		"en_US": "PRE-REGISTRATION AND HYPOTHESIS TESTING"
@@ -565,7 +1048,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_pre-1",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "This paper is based on a Registered Report that has been accepted at Personality Science previously."
@@ -596,7 +1079,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_pre-2",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Prior to analyzing the complete data set, a time-stamped preregistration was posted in an independent, third-party registry. The paper contains a link to that pre-registration"
@@ -625,7 +1108,7 @@
 	},
 	{
 	  "type": "text",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Please provide the link to the pre-registration here :"
@@ -640,7 +1123,7 @@
 	{
 	  "type": "checkbox",
 	  "inline": false,
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Please mark all that apply: The pre-registration contained ..."
@@ -694,7 +1177,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_pre-10",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Any deviations from the pre-registration are clearly described and justified in the paper."
@@ -725,7 +1208,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_pre-11",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "If hypotheses were tested that were not pre-registered, this is made clear in the paper. These should be labeled exploratory hypotheses."
@@ -756,7 +1239,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_pre-12",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "The paper clearly labels which hypotheses were confirmatory (i.e., pre-registered) and which exploratory (i.e., no pre-registered)."
@@ -785,7 +1268,7 @@
 	},
 	{
 	  "type": "textarea",
-	  "class": "em-margin-bottom-60",
+	  "class": "em-margin-bottom-2",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Open Comments"
@@ -799,7 +1282,7 @@
 	},
 	{
 	  "type": "headline",
-	  "class": "em-margin-bottom-10 em-border-bottom",
+	  "class": "em-margin-bottom-1 em-border-bottom",
 	  "title": {
 		"class": "em-text-center ",
 		"en_US": "METHODS"
@@ -813,7 +1296,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-1",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "The paper adheres to full reporting standards as encapsulated in the 21-word solution by Simmons, Nelson, and Simonsohn (2012):  \"We report how we determined our sample size, all data exclusions (if any), all manipulations, and all measures in the study.\""
@@ -842,7 +1325,7 @@
 	},
 	{
 	  "type": "headline",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"en_US": "The Methods section of the paper fully describes ..."
 	  },
@@ -854,7 +1337,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-2",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "the rationale for the sample size used (e.g., an a priori power analysis)."
@@ -885,7 +1368,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-3",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "how participants were recruited and selected (e.g., eligibility criteria)."
@@ -916,7 +1399,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-4",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "if or what compensation was offered for participation."
@@ -947,7 +1430,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-5",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "how participant dropouts or data exclusions were handled (e.g., replaced, omitted, etc.)."
@@ -978,7 +1461,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-6",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "if or how participants were assigned to (experimental or treatment) conditions."
@@ -1009,7 +1492,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-7",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "if or how stimulus materials were randomized."
@@ -1040,7 +1523,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-8",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "if and how participants, experimenters, and data-analysts were kept naive to potentially biasing information."
@@ -1071,7 +1554,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-9",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "if the study design, procedures, and materials to allow independent replication."
@@ -1102,7 +1585,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-10",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "the measures of interest (e.g., original citation, response options, etc.)."
@@ -1133,7 +1616,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-11",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "ethical measures taken and, if applicable, details (e.g., ID number) of institutional ethics committee or IRB approval."
@@ -1164,7 +1647,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-12",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "The paper – or openly accessible supplemental materials (that are references or linked to in the paper) – fully discloses all information regarding any procedures and measures used."
@@ -1195,7 +1678,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-13",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "The paper indicates if (any portion of) the reported dataset has appeared in any other papers and where (submitted or accepted). It also described the nature and degree of overlap(s) and unique contribution(s) of the current paper."
@@ -1226,7 +1709,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_meth-14",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "The paper contains a link to openly accessible materials (e.g., instructions, stimuli, test materials, original items, scripts, codebook for variables, study plan, etc.). These can be used to replicate the study."
@@ -1255,7 +1738,7 @@
 	},
 	{
 	  "type": "text",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "If \"No\", please justify why:"
@@ -1273,7 +1756,7 @@
 	},
 	{
 	  "type": "text",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Please provide the link to the open materials here:"
@@ -1287,7 +1770,7 @@
 	},
 	{
 	  "type": "textarea",
-	  "class": "em-margin-bottom-60",
+	  "class": "em-margin-bottom-2",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Comments about the Methods section"
@@ -1313,7 +1796,7 @@
 	},
 	{
 	  "type": "headline",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"en_US": "The Results section of the paper ..."
 	  },
@@ -1325,7 +1808,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_1",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "describes protocols for data pre-processing (e.g., cleaning, discarding of cases and items, normalizing, smoothing, artifact correction)."
@@ -1356,7 +1839,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_2",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "distinguishes explicitly between \"confirmatory\" (i.e., pre-registered) and \"exploratory\" (i.e., not pre-registered) analyses."
@@ -1387,7 +1870,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_3",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "describes how violations of statistical assumptions were handled."
@@ -1418,7 +1901,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_4",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "justifies all statistical choices (e.g., including or excluding covariates; applying or not applying transformations; etc.). "
@@ -1449,7 +1932,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_5",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "reports the effective or actually used sample size (e.g., for each analysis, cell of the design, etc.)."
@@ -1480,7 +1963,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_6",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "reports how incomplete or missing data were handled."
@@ -1511,7 +1994,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_7",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "reports all findings in simple past tense."
@@ -1542,7 +2025,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_8",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "reports basic descriptive statistics (i.e., central tendencies, variations, reliabilities, and intercorrelations) of all variables that are used in the analyses. Preferably, this information is integrated into a table in the paper. If it cannot be feasibly done, then it must be available in supplemental materials which are referenced or linked to in the paper."
@@ -1573,7 +2056,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_9",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "reports effect sizes (e.g., d, eta squared) for all focal tests (not just p-values). Pearson's r and regression weights can count as effect sizes, but their relative magnitude(s) need to be discussed in the text."
@@ -1604,7 +2087,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_10",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "reports 95% confidence or credibility intervals of focal effect sizes."
@@ -1635,7 +2118,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_11",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "reports only exact p-values if p-values are given."
@@ -1666,7 +2149,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_12",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "reports analyses with and without the inclusion of control variables and clearly states if and how findings diverge as a function of including (or not including) control variables. If issues of word count arise, then some of this information may be relegated to a brief paragraph, while the bulk of analyses are presented in online supplemental materials which are referenced or linked to in the paper."
@@ -1697,7 +2180,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_13",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "reports for all scale scores used, if applicable, whether or how measurement models (e.g., with CFAs) fit the data as well as whether measurement invariance (across groups or time) needed to be established. Detailed information and all tests can be relegated to online supplemental materials which are referenced or linked to in the paper. "
@@ -1728,7 +2211,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_14",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "The paper contains a link to openly accessible data (e.g., raw data, processed data, etc.) on which the analyses were based."
@@ -1757,7 +2240,7 @@
 	},
 	{
 	  "type": "text",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Please provide the link to the open data here:"
@@ -1777,7 +2260,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_16",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "If the data cannot be made available, the paper states so explicitly and explains the reasons."
@@ -1812,7 +2295,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_res_17",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "The paper contains a link to openly accessible data-analytical scripts, code, or syntax (that is not copyright-protected). These can be used to reproduce the analyses of the paper."
@@ -1841,7 +2324,7 @@
 	},
 	{
 	  "type": "text",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "If \"No\", please justify why:"
@@ -1859,7 +2342,7 @@
 	},
 	{
 	  "type": "text",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Please provide the link to the open data-analytical scrips, code, or syntax here:"
@@ -1877,7 +2360,7 @@
 	},
 	{
 	  "type": "textarea",
-	  "class": "em-margin-bottom-60",
+	  "class": "em-margin-bottom-2",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "Comments about the Results section"
@@ -1904,7 +2387,7 @@
 	},
 	{
 	  "type": "headline",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"en_US": "The Discussion section of the paper ..."
 	  },
@@ -1916,7 +2399,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_dis_1",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "contains (a) a brief summary of the findings, (b) a careful discussion and interpretation of the findings (in light of previous literature), (c) implications and merits (theoretical, practical, societal, etc.), (d) limitations, and (e) prospects and future directions."
@@ -1947,7 +2430,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_dis_2",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "carefully interprets the magnitude and relevance of effect sizes."
@@ -1978,7 +2461,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_dis_3",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "provides a balanced discussion of the findings as well as their relative merits and limitations."
@@ -2009,7 +2492,7 @@
 	  "type": "radio",
 	  "inline": true,
 	  "name": "en_dis_4",
-	  "class": "em-margin-bottom-10",
+	  "class": "em-margin-bottom-1",
 	  "title": {
 		"class": "em-font-weight-normal em-font-14px",
 		"en_US": "clearly describes in the Limitations sub-section the Constraints on Generality (COG: Simons, Shoda, & Lindsay, 2017 )."
