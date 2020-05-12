@@ -276,4 +276,55 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		return array_unique($res);
 	}
 
+	/**
+	 * Add settings button to plugin
+	 * @param $request
+	 * @param array $verb
+	 * @return array
+	 */
+	public function getActions($request, $verb)
+	{
+		$router = $request->getRouter();
+		import('lib.pkp.classes.linkAction.request.AjaxModal');
+		return array_merge(
+			$this->getEnabled() ? array(
+				new LinkAction(
+					'settings',
+					new AjaxModal(
+						$router->url($request, null, null, 'manage', null, array('verb' => 'settings', 'plugin' => $this->getName(), 'category' => 'generic')),
+						$this->getDisplayName()
+					),
+					__('manager.plugins.settings'),
+					null
+				),
+			) : array(),
+			parent::getActions($request, $verb)
+		);
+	}
+
+	/**
+	 * Manage Settings
+	 * @param array $args
+	 * @param PKPRequest $request
+	 * @return JSONMessage
+	 */
+	public function manage($args, $request)
+	{
+		switch ($request->getUserVar('verb')) {
+			case 'settings':
+				$this->import('EnhancedMetadataSettingsForm');
+				$form = new EnhancedMetadataSettingsForm($this);
+				if (!$request->getUserVar('save')) {
+					$form->initData();
+					return new JSONMessage(true, $form->fetch($request));
+				}
+				$form->readInputData();
+				if ($form->validate()) {
+					$form->execute();
+					return new JSONMessage(true);
+				}
+		}
+		return parent::manage($args, $request);
+	}
+
 }
