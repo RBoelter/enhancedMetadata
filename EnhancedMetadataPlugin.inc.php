@@ -45,9 +45,9 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			HookRegistry::register('issueentrysubmissionreviewform::readuservars', array($this, 'addUserVars'));
 			HookRegistry::register('quicksubmitform::readuservars', array($this, 'addUserVars'));
 			HookRegistry::register('supplementaryfilemetadataform::readuservars', array($this, 'addUserVars'));
-			// Hook for save into forms
+			// Hook for form validation
 			HookRegistry::register('submissionsubmitstep3form::validate', array($this, 'submissionMetadataValidate'));
-
+			// Hook for form execute
 			HookRegistry::register('submissionsubmitstep3form::execute', array($this, 'submissionMetadataExecute'));
 			HookRegistry::register('issueentrysubmissionreviewform::execute', array($this, 'submissionMetadataExecute'));
 			HookRegistry::register('quicksubmitform::execute', array($this, 'submissionMetadataExecute'));
@@ -55,6 +55,10 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			// Hook for save into db
 			HookRegistry::register('articledao::getAdditionalFieldNames', array($this, 'addAdditionalFieldNames'));
 			HookRegistry::register('supplementaryfiledaodelegate::getLocaleFieldNames', array($this, 'addLocaleFieldNames'));
+			// View Hooks
+			// Submission Add Reviewer
+			HookRegistry::register('advancedsearchreviewerform::display', array($this, 'metadataFormDisplay'));
+
 		}
 		return $success;
 	}
@@ -68,19 +72,91 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	function metadataFormDisplay($hookName, $params)
 	{
 		$form =& $params[0];
-		if (!is_array($form) && get_class($form) == 'SupplementaryFileMetadataForm') {
+		if (!is_array($form)) {
 			$request = PKPApplication::getRequest();
 			$templateMgr = TemplateManager::getManager($request);
-			$submissionFile = $form->getSubmissionFile();
-			if ($submissionFile)
-				$form->setData('enhTest2', $submissionFile->getData('enhTest2'));
-			$templateMgr->registerFilter("output", array($this, 'supplementaryMetadataFilter'));
+			switch (get_class($form)) {
+				case 'SupplementaryFileMetadataForm':
+					$submissionFile = $form->getSubmissionFile();
+					if ($submissionFile)
+						$form->setData('enhTest2', $submissionFile->getData('enhTest2'));
+					$templateMgr->registerFilter("output", array($this, 'addViewFilter'));
+					break;
+				case 'AdvancedSearchReviewerForm':
+					// TODO read all schema files in folder! should be own function
+					$submission = $form->getSubmission();
+					$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
+					$jsonData = $submission->getData('enh_' . $jsonSchema['form'] . '_' . $jsonSchema['version']);
+					if (isset($jsonData))
+						$jsonData = json_decode($jsonData, true);
+					$viewArray = [];
+					if ($jsonSchema && isset($jsonSchema['items']) && isset($jsonData)) {
+						foreach ($jsonSchema['items'] as $item) {
+							if (isset($item['viewForms'])) {
+								$content = $this->getFieldValues($item, $jsonData);
+								foreach ($item['viewForms'] as $formItem) {
+									if ($formItem['form'] && $formItem['form'] == 'AdvancedSearchReviewerForm') {
+										$viewArray[] = [
+											'title' => $formItem['title'],
+											'type' => $formItem['notifyType'],
+											'list' => $formItem['list'],
+											'content' => $content];
+									}
+								}
+							}
+						}
+					}
+					// TODO End
+
+					$form->setData('enhViewArray', $viewArray);
+					$templateMgr->registerFilter("output", array($this, 'addViewFilter'));
+					break;
+			}
 		} else {
 			$smarty =& $params[1];
 			$output =& $params[2];
 			$output .= $smarty->fetch($this->getTemplateResource('submissionMetaData.tpl'));
 		}
 		return false;
+	}
+
+
+	function getFieldValues($node, $data)
+	{
+		$res = [];
+		switch ($node['type']) {
+			case 'select':
+			case 'radio':
+				$res = [$data[$node['name']]];
+				break;
+			default:
+				if (isset($node['fields']))
+					foreach ($node['fields'] as $field)
+						$res = array_merge($res, explode(PHP_EOL, $data[$field['name']]));
+		}
+		return $res;
+	}
+
+	function addViewFilter($output, $templateMgr)
+	{
+		if (preg_match('/<div id="advancedReviewerSearch" class="pkp_form pkp_form_advancedReviewerSearch">/', $output, $matches, PREG_OFFSET_CAPTURE)) {
+			$match = $matches[0][0];
+			$offset = $matches[0][1];
+			$newOutput = substr($output, 0, $offset + strlen($match));
+			$newOutput .= $templateMgr->fetch($this->getTemplateResource('viewMetaData.tpl'));
+			$newOutput .= substr($output, $offset + strlen($match));
+			$output = $newOutput;
+			$templateMgr->unregisterFilter('output', array($this, 'addViewFilter'));
+		} else if (preg_match('/<fieldset\s*id="\s*fileMetaData\s*"\s*>/', $output, $matches, PREG_OFFSET_CAPTURE)) {
+			$match = $matches[0][0];
+			$offset = $matches[0][1];
+			$newOutput = substr($output, 0, $offset + strlen($match));
+			$newOutput .= $templateMgr->fetch($this->getTemplateResource('supplementaryMetaData.tpl'));
+			$newOutput .= substr($output, $offset + strlen($match));
+			$output = $newOutput;
+			$templateMgr->unregisterFilter('output', array($this, 'addViewFilter'));
+		}
+		return $output;
 	}
 
 	/**
@@ -109,7 +185,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 				if ($version && intval($version) && $version > 0) {
 					$json = null;
 					do {
-						$json = $article->getData('enhMetaDataJson_' . $version--);
+						$json = $article->getData('enh_' . $jsonSchema['form'] . '_' . $version--);
 					} while ($json == null && $version > 0);
 					if ($json) {
 						$form->setData('enhMetaDataJson', json_decode($json, true));
@@ -189,6 +265,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		}
 		if ($article != null) {
 			$enhData = [];
+			// TODO read all schema files in folder and save in db with schema name!!!
 			$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
 			if ($jsonSchema && $jsonSchema['items']) {
 				$names = $this->getNameParam($jsonSchema['items']);
@@ -196,7 +273,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 					$enhData[$name] = $form->getData($name);
 				}
 			}
-			$article->setData('enhMetaDataJson_' . $jsonSchema['version'], json_encode($enhData));
+			$article->setData('enh_' . $jsonSchema['form'] . '_' . $jsonSchema['version'], json_encode($enhData));
 		}
 		if ($submissionFile != null) {
 			$submissionFile->setData('enhTest2', $form->getData('enhTest2'));
@@ -218,24 +295,10 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			case 'ArticleDAO':
 			case 'SupplementaryFileDAODelegate':
 				$fields =& $params[1];
-				$fields[] = 'enhMetaDataJson_' . $jsonSchema['version'];
+				$fields[] = 'enh_' . $jsonSchema['form'] . '_' . $jsonSchema['version'];
 				break;
 		}
 		return false;
-	}
-
-	function supplementaryMetadataFilter($output, $templateMgr)
-	{
-		if (preg_match('/<fieldset\s*id="\s*fileMetaData\s*"\s*>/', $output, $matches, PREG_OFFSET_CAPTURE)) {
-			$match = $matches[0][0];
-			$offset = $matches[0][1];
-			$newOutput = substr($output, 0, $offset + strlen($match));
-			$newOutput .= $templateMgr->fetch($this->getTemplateResource('supplementaryMetaData.tpl'));
-			$newOutput .= substr($output, $offset + strlen($match));
-			$output = $newOutput;
-			$templateMgr->unregisterFilter('output', array($this, 'supplementaryMetadataFilter'));
-		}
-		return $output;
 	}
 
 	function getJsonScheme($name)
@@ -251,6 +314,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 					switch ($itm['type']) {
 						case 'text':
 						case 'textarea';
+							/* TODO Message */
 							$form->addCheck(new FormValidatorLength($form, $field['name'] . '[en_US]', 'optional', 'user.register.form.passwordLengthRestriction', '<=', $field['maxLength']));
 							break;
 					}

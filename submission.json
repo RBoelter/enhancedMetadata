@@ -3,6 +3,56 @@
   "form": "submission",
   "items": [
 	{
+	  "type": "textarea",
+	  "class": "em-margin-bottom-2",
+	  "description": {
+		"class": "em-font-14px",
+		"en_US": "Please suggest at least 3 reviewers that (a) are able to review your paper but (b) have no obvious conflicts of interests. We cannot guarantee that one of the listed persons will serve as a reviewer. (One per line; First Name, Last Name, Reason)"
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-28",
+		  "maxLength": 500
+		}
+	  ],
+	  "viewForms": [
+		{
+		  "form": "AdvancedSearchReviewerForm",
+		  "list": true,
+		  "notifyType": "info",
+		  "title": {
+			"class": "em-font-weight-normal em-font-14px",
+			"en_US": "Potential Reviewers"
+		  }
+		}
+	  ]
+	},
+	{
+	  "type": "textarea",
+	  "class": "em-margin-bottom-2",
+	  "description": {
+		"class": "em-font-14px",
+		"en_US": "Optional: Please list any reviewers you oppose or that should not review your paper (e.g., because of obvious conflicts of interests, such as previous or current mentors), and indicate the reason(s) for this. (One per line; First Name, Last Name, Reason)"
+	  },
+	  "fields": [
+		{
+		  "name": "en_paper-27",
+		  "maxLength": 500
+		}
+	  ],
+	  "viewForms": [
+		{
+		  "form": "AdvancedSearchReviewerForm",
+		  "list": true,
+		  "notifyType": "warning",
+		  "title": {
+			"class": "em-font-weight-normal em-font-14px",
+			"en_US": "Excluded Reviewers"
+		  }
+		}
+	  ]
+	},
+	{
 	  "type": "radio",
 	  "inline": false,
 	  "name": "en_paper-26",
