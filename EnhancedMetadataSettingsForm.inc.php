@@ -1,7 +1,6 @@
 <?php
 
 import('lib.pkp.classes.form.Form');
-import('lib.pkp.classes.file.FileManager');
 import('classes.notification.NotificationManager');
 
 class EnhancedMetadataSettingsForm extends Form
@@ -9,6 +8,10 @@ class EnhancedMetadataSettingsForm extends Form
 	public $plugin;
 	private $folderPath;
 
+	/**
+	 * EnhancedMetadataSettingsForm constructor.
+	 * @param $plugin
+	 */
 	public function __construct($plugin)
 	{
 		parent::__construct($plugin->getTemplateResource('settings.tpl'));
@@ -19,26 +22,34 @@ class EnhancedMetadataSettingsForm extends Form
 		$this->folderPath = Config::getVar('files', 'public_files_dir') . '/journals/' . $contextId . '/enhancedForms';
 	}
 
+	/**
+	 *
+	 */
 	public function initData()
 	{
-		$contextId = Application::getRequest()->getContext()->getId();
-		$data = $this->plugin->getSetting($contextId, 'settings');
-		$fileManager = new FileManager();
-		/* TODO READ FILE */
-		if ($data != null && $data != '') {
-			$data = json_decode($data, true);
-			$this->setData('emTitle', $data['title']);
-			$this->setData('emFile', $data['file']);
+		$settings = $this->plugin->getSetting(Application::getRequest()->getContext()->getId(), 'settings');
+		if (isset($settings)) {
+			$settings = json_decode($settings, true);
+			$this->setData('emFiles', $settings);
 		}
 		parent::initData();
 	}
 
+	/**
+	 *
+	 */
 	public function readInputData()
 	{
-		$this->readUserVars(['emTitle', 'emFile']);
+		$this->readUserVars(['emFile']);
 		parent::readInputData();
 	}
 
+	/**
+	 * @param PKPRequest $request
+	 * @param null $template
+	 * @param bool $display
+	 * @return string|null
+	 */
 	public function fetch($request, $template = null, $display = false)
 	{
 		$templateMgr = TemplateManager::getManager($request);
@@ -46,16 +57,15 @@ class EnhancedMetadataSettingsForm extends Form
 		return parent::fetch($request, $template, $display);
 	}
 
+	/**
+	 * @param mixed ...$args
+	 * @return mixed|null
+	 */
 	public function execute(...$args)
 	{
 		$contextId = Application::getRequest()->getContext()->getId();
-		$data = [
-			"title" => $this->getData('emTitle'),
-			"file" => $this->getData('emFile')
-		];
 		$notificationMgr = new NotificationManager();
-		$fileManager = new FileManager();
-
+		$fileManager = new PublicFileManager();
 		$jsonString = $this->getData('emFile');
 		$jsonObj = json_decode($jsonString, true);
 		if (isset($jsonObj)) {
@@ -66,13 +76,16 @@ class EnhancedMetadataSettingsForm extends Form
 				$notificationMgr->createTrivialNotification(
 					Application::getRequest()->getUser()->getId(),
 					NOTIFICATION_TYPE_ERROR,
-					/* TODO correct error msg */
-					['contents' => __('common.error')]
+					['contents' => __('plugins.generic.enhanced.metadata.settings.upload.error')]
 				);
 			} else {
-				/* TODO SAVE FILENAMESETTINGS TO DB*/
 				$fileManager->writeFile($filepath, $jsonString);
-				$this->plugin->updateSetting($contextId, 'settings', json_encode($data));
+				$settings = $this->plugin->getSetting($contextId, 'settings');
+				if (isset($settings)) {
+					$settings = json_decode($settings, true);
+				}
+				$settings[$jsonObj['form']][$jsonObj['version']] = $filepath;
+				$this->plugin->updateSetting($contextId, 'settings', json_encode($settings));
 				$notificationMgr->createTrivialNotification(
 					Application::getRequest()->getUser()->getId(),
 					NOTIFICATION_TYPE_SUCCESS,

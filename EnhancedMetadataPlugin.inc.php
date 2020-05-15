@@ -1,6 +1,10 @@
 <?php
+/* TODO remove noinspection*/
+/** @noinspection PhpUnusedParameterInspection */
+/** @noinspection PhpUnused */
 import('lib.pkp.classes.plugins.GenericPlugin');
 import('lib.pkp.classes.form.validation.FormValidatorLength');
+
 
 /**
  * Class EnhancedMetadataPlugin
@@ -10,13 +14,25 @@ import('lib.pkp.classes.form.validation.FormValidatorLength');
 class EnhancedMetadataPlugin extends GenericPlugin
 {
 
+	private $emDataService;
+
+	/**
+	 * EnhancedMetadataPlugin constructor.
+	 */
+	public function __construct()
+	{
+		import('plugins.generic.enhancedMetadata.classes.EMDataService');
+		$this->emDataService = new EMDataService();
+		parent::__construct();
+	}
+
 
 	/**
 	 * @return string plugin name
 	 */
 	public function getDisplayName()
 	{
-		return __('plugins.generic.enhancedMetadata.title');
+		return __('plugins.generic.enhanced.metadata.title');
 	}
 
 	/**
@@ -24,10 +40,12 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	 */
 	public function getDescription()
 	{
-		return __('plugins.generic.enhancedMetadata.desc');
+		return __('plugins.generic.enhanced.metadata.desc');
 	}
 
+	// TODO remove no ispection
 
+	/** @noinspection PhpParamsInspection */
 	public function register($category, $path, $mainContextId = NULL)
 	{
 		$success = parent::register($category, $path);
@@ -85,7 +103,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 				case 'AdvancedSearchReviewerForm':
 					// TODO read all schema files in folder! should be own function
 					$submission = $form->getSubmission();
-					$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
+					$jsonSchema = $this->emDataService->getJsonScheme($this->getPluginPath() . '/submission.json');
 					$jsonData = $submission->getData('enh_' . $jsonSchema['form'] . '_' . $jsonSchema['version']);
 					if (isset($jsonData))
 						$jsonData = json_decode($jsonData, true);
@@ -93,7 +111,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 					if ($jsonSchema && isset($jsonSchema['items']) && isset($jsonData)) {
 						foreach ($jsonSchema['items'] as $item) {
 							if (isset($item['viewForms'])) {
-								$content = $this->getFieldValues($item, $jsonData);
+								$content = $this->emDataService->getFieldValues($item, $jsonData);
 								foreach ($item['viewForms'] as $formItem) {
 									if ($formItem['form'] && $formItem['form'] == 'AdvancedSearchReviewerForm') {
 										$viewArray[] = [
@@ -120,45 +138,6 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		return false;
 	}
 
-
-	function getFieldValues($node, $data)
-	{
-		$res = [];
-		switch ($node['type']) {
-			case 'select':
-			case 'radio':
-				$res = [$data[$node['name']]];
-				break;
-			default:
-				if (isset($node['fields']))
-					foreach ($node['fields'] as $field)
-						$res = array_merge($res, explode(PHP_EOL, $data[$field['name']]));
-		}
-		return $res;
-	}
-
-	function addViewFilter($output, $templateMgr)
-	{
-		if (preg_match('/<div id="advancedReviewerSearch" class="pkp_form pkp_form_advancedReviewerSearch">/', $output, $matches, PREG_OFFSET_CAPTURE)) {
-			$match = $matches[0][0];
-			$offset = $matches[0][1];
-			$newOutput = substr($output, 0, $offset + strlen($match));
-			$newOutput .= $templateMgr->fetch($this->getTemplateResource('viewMetaData.tpl'));
-			$newOutput .= substr($output, $offset + strlen($match));
-			$output = $newOutput;
-			$templateMgr->unregisterFilter('output', array($this, 'addViewFilter'));
-		} else if (preg_match('/<fieldset\s*id="\s*fileMetaData\s*"\s*>/', $output, $matches, PREG_OFFSET_CAPTURE)) {
-			$match = $matches[0][0];
-			$offset = $matches[0][1];
-			$newOutput = substr($output, 0, $offset + strlen($match));
-			$newOutput .= $templateMgr->fetch($this->getTemplateResource('supplementaryMetaData.tpl'));
-			$newOutput .= substr($output, $offset + strlen($match));
-			$output = $newOutput;
-			$templateMgr->unregisterFilter('output', array($this, 'addViewFilter'));
-		}
-		return $output;
-	}
-
 	/**
 	 * @param $hookName
 	 * @param $params
@@ -179,7 +158,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 					break;
 			}
 		if ($article) {
-			$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
+			$jsonSchema = $this->emDataService->getJsonScheme($this->getPluginPath() . '/submission.json');
 			if ($jsonSchema && $jsonSchema['items']) {
 				$version = $jsonSchema['version'];
 				if ($version && intval($version) && $version > 0) {
@@ -211,9 +190,9 @@ class EnhancedMetadataPlugin extends GenericPlugin
 				case 'QuickSubmitForm':
 				case 'SubmissionSubmitStep3Form':
 				case 'IssueEntrySubmissionReviewForm':
-					$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
+					$jsonSchema = $this->emDataService->getJsonScheme($this->getPluginPath() . '/submission.json');
 					if ($jsonSchema && $jsonSchema['items']) {
-						$names = $this->getNameParam($jsonSchema['items']);
+						$names = $this->emDataService->getNameParam($jsonSchema['items']);
 						$this->addChecks($form, $jsonSchema['items']);
 						foreach ($names as $name)
 							$userVars[] = $name;
@@ -229,9 +208,9 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	function submissionMetadataValidate($hookName, $params)
 	{
 		$form =& $params[0];
-		$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
+		$jsonSchema = $this->emDataService->getJsonScheme($this->getPluginPath() . '/submission.json');
 		if ($jsonSchema && $jsonSchema['items']) {
-			$names = $this->getNameParam($jsonSchema['items']);
+			$names = $this->emDataService->getNameParam($jsonSchema['items']);
 			$enhData = [];
 			foreach ($names as $name) {
 				$enhData[$name] = $form->getData($name);
@@ -266,9 +245,9 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		if ($article != null) {
 			$enhData = [];
 			// TODO read all schema files in folder and save in db with schema name!!!
-			$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
+			$jsonSchema = $this->emDataService->getJsonScheme($this->getPluginPath() . '/submission.json');
 			if ($jsonSchema && $jsonSchema['items']) {
-				$names = $this->getNameParam($jsonSchema['items']);
+				$names = $this->emDataService->getNameParam($jsonSchema['items']);
 				foreach ($names as $name) {
 					$enhData[$name] = $form->getData($name);
 				}
@@ -281,7 +260,6 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		return false;
 	}
 
-
 	/**
 	 * @param $hookName
 	 * @param $params
@@ -290,7 +268,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	function addAdditionalFieldNames($hookName, $params)
 	{
 		$form =& $params[0];
-		$jsonSchema = $this->getJsonScheme($this->getPluginPath() . '/submission.json');
+		$jsonSchema = $this->emDataService->getJsonScheme($this->getPluginPath() . '/submission.json');
 		switch (get_class($form)) {
 			case 'ArticleDAO':
 			case 'SupplementaryFileDAODelegate':
@@ -301,10 +279,29 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		return false;
 	}
 
-	function getJsonScheme($name)
+
+	function addViewFilter($output, $templateMgr)
 	{
-		return json_decode(file_get_contents($name), true);
+		if (preg_match('/<div id="advancedReviewerSearch" class="pkp_form pkp_form_advancedReviewerSearch">/', $output, $matches, PREG_OFFSET_CAPTURE)) {
+			$match = $matches[0][0];
+			$offset = $matches[0][1];
+			$newOutput = substr($output, 0, $offset + strlen($match));
+			$newOutput .= $templateMgr->fetch($this->getTemplateResource('viewMetaData.tpl'));
+			$newOutput .= substr($output, $offset + strlen($match));
+			$output = $newOutput;
+			$templateMgr->unregisterFilter('output', array($this, 'addViewFilter'));
+		} else if (preg_match('/<fieldset\s*id="\s*fileMetaData\s*"\s*>/', $output, $matches, PREG_OFFSET_CAPTURE)) {
+			$match = $matches[0][0];
+			$offset = $matches[0][1];
+			$newOutput = substr($output, 0, $offset + strlen($match));
+			$newOutput .= $templateMgr->fetch($this->getTemplateResource('supplementaryMetaData.tpl'));
+			$newOutput .= substr($output, $offset + strlen($match));
+			$output = $newOutput;
+			$templateMgr->unregisterFilter('output', array($this, 'addViewFilter'));
+		}
+		return $output;
 	}
+
 
 	function addChecks($form, $data)
 	{
@@ -322,23 +319,6 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		}
 	}
 
-	function getNameParam($data)
-	{
-		$res = [];
-		foreach ($data as $itm) {
-			switch ($itm['type']) {
-				case 'select':
-				case 'radio':
-					$res[] = $itm['name'];
-					break;
-				default:
-					if ($itm['fields'])
-						foreach ($itm['fields'] as $field)
-							$res[] = $field['name'];
-			}
-		}
-		return array_unique($res);
-	}
 
 	/**
 	 * Add settings button to plugin
