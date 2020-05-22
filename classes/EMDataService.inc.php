@@ -4,9 +4,23 @@
 class EMDataService
 {
 
-	function getJsonScheme($name)
+	function getJsonScheme($name, $plugin)
 	{
-		return json_decode(file_get_contents($name), true);
+		$settings = $plugin->getSetting(Application::getRequest()->getContext()->getId(), 'settings');
+		if (isset($settings))
+			$settings = json_decode($settings, true);
+		if (isset($settings)) {
+			$versions = $settings[$name];
+			if (isset($versions)) {
+				$latest = $versions[max(array_keys($versions))];
+				$fileManager = new PublicFileManager();
+				if ($fileManager->fileExists($latest)) {
+					$file = $fileManager->readFileFromPath($latest);
+					return json_decode($file, true);
+				}
+			}
+		}
+		return null;
 	}
 
 
@@ -36,7 +50,7 @@ class EMDataService
 					$res[] = $itm['name'];
 					break;
 				default:
-					if ($itm['fields'])
+					if (isset($itm['fields']))
 						foreach ($itm['fields'] as $field)
 							$res[] = $field['name'];
 			}

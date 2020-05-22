@@ -10,99 +10,13 @@
  * Enhanced Metadata Submission Form
  *
  *}
+<link rel="stylesheet" type="text/css" href="{$enhMetaDataStyle}">
+<script src="{$enhMetaDataScript}" type="text/javascript"></script>
 
-<script>
-	document.querySelectorAll('[data-condition]').forEach(field => {
-		let condition = JSON.parse(field.getAttribute('data-condition'));
-		collect(field, condition.item, condition.value);
-	});
 
-	function collect(elem, c_name, c_value) {
-		document.querySelectorAll('input[name="' + c_name + '"]').forEach(c_elem => {
-			if (c_elem) {
-				switch (c_elem.type) {
-					case  'radio':
-					case 'checkbox':
-						if (c_elem.checked && c_elem.value === '' + c_value) {
-							elem.classList.remove('em-hidden-field');
-							elem.classList.add('em-margin-left');
-						}
-						c_elem.addEventListener('click', function () {
-							checkboxListener(elem, c_elem, c_value);
-						});
-						break;
-				}
-			}
-		});
-	}
-
-	function checkboxListener(elem, c_elem, c_value) {
-		if (c_elem.checked && c_elem.value === '' + c_value) {
-			elem.classList.remove('em-hidden-field');
-			elem.classList.add('em-margin-left');
-		} else {
-			elem.classList.add('em-hidden-field');
-			elem.classList.remove('em-margin-left');
-			elem.querySelectorAll('input').forEach(itm => itm.value = '');
-		}
-	}
-
-	document.querySelectorAll('.checkNum').forEach(function (el) {ldelim}
-		el.addEventListener("input", elem => el.value = (isNaN(el.value)) ? el.value.replace(elem.data, '') : el.value);
-        {rdelim})
-</script>
-
-<style>
-	.em-hidden-field {
-		display: none;
-	}
-
-	.em-inline {
-		display: inline-flex;
-		margin-right: 15px;
-	}
-
-	.em-font-weight-normal {
-		/*font-weight: normal !important;*/
-	}
-
-	.em-font-14px {
-		font-size: 14px !important;
-	}
-
-	.em-section-radio {
-
-	}
-
-	.em-margin-bottom-2 {
-		margin-bottom: 60px !important;
-	}
-
-	.em-margin-bottom-1 {
-		margin-bottom: 10px !important;
-	}
-
-	.em-text-center {
-		text-align: center;
-	}
-
-	.em-font-italic {
-		font-style: italic;
-	}
-
-	.em-border-bottom {
-		border-bottom: 1px solid black;
-	}
-
-	.em-margin-left {
-		margin-left: 20px;
-	}
-
-</style>
-
-{fbvFormSection title="plugins.generic.enhanced.metadata.submission.title" class="enhanced-metadata"}
+{*{fbvFormSection title="plugins.generic.enhanced.metadata.submission.title" class="enhanced-metadata"}
 	<p class="description">{translate key="plugins.generic.enhanced.metadata.submission.description"}</p>
-{/fbvFormSection}
+{/fbvFormSection}*}
 {fbvFormArea id="enhanced-metadata-form"}
 {foreach from=$enhFormFields item=$itm}
     {if $itm['type']=='text' || $itm['type']=='textarea'}

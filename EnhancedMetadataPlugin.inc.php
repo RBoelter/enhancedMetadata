@@ -53,30 +53,35 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			// Add metadata fields to submission
 			HookRegistry::register('Templates::Submission::SubmissionMetadataForm::AdditionalMetadata', array($this, 'metadataFormDisplay'));
 			HookRegistry::register('supplementaryfilemetadataform::display', array($this, 'metadataFormDisplay'));
+			HookRegistry::register('authorform::display', array($this, 'metadataFormDisplay'));
 			// Hook for initData
-			HookRegistry::register('submissionsubmitstep3form::initdata', array($this, 'submissionMetadataInitData'));
-			HookRegistry::register('issueentrysubmissionreviewform::initdata', array($this, 'submissionMetadataInitData'));
-			HookRegistry::register('quicksubmitform::initdata', array($this, 'submissionMetadataInitData'));
+			HookRegistry::register('submissionsubmitstep3form::initdata', array($this, 'metadataFormInit'));
+			HookRegistry::register('issueentrysubmissionreviewform::initdata', array($this, 'metadataFormInit'));
+			HookRegistry::register('quicksubmitform::initdata', array($this, 'metadataFormInit'));
+			HookRegistry::register('authorform::initdata', array($this, 'metadataFormInit'));
 			/*HookRegistry::register('supplementaryfilemetadataform::initdata', array($this, 'submissionMetadataInitData'));*/
 			// Hook for readUserVars
 			HookRegistry::register('submissionsubmitstep3form::readuservars', array($this, 'addUserVars'));
 			HookRegistry::register('issueentrysubmissionreviewform::readuservars', array($this, 'addUserVars'));
 			HookRegistry::register('quicksubmitform::readuservars', array($this, 'addUserVars'));
+			HookRegistry::register('authorform::readuservars', array($this, 'addUserVars'));
 			HookRegistry::register('supplementaryfilemetadataform::readuservars', array($this, 'addUserVars'));
 			// Hook for form validation
+			// TODO Validate for all forms
 			HookRegistry::register('submissionsubmitstep3form::validate', array($this, 'submissionMetadataValidate'));
 			// Hook for form execute
-			HookRegistry::register('submissionsubmitstep3form::execute', array($this, 'submissionMetadataExecute'));
-			HookRegistry::register('issueentrysubmissionreviewform::execute', array($this, 'submissionMetadataExecute'));
-			HookRegistry::register('quicksubmitform::execute', array($this, 'submissionMetadataExecute'));
-			HookRegistry::register('supplementaryfilemetadataform::execute', array($this, 'submissionMetadataExecute'));
+			HookRegistry::register('submissionsubmitstep3form::execute', array($this, 'metadataFormExecute'));
+			HookRegistry::register('issueentrysubmissionreviewform::execute', array($this, 'metadataFormExecute'));
+			HookRegistry::register('quicksubmitform::execute', array($this, 'metadataFormExecute'));
+			HookRegistry::register('authorform::execute', array($this, 'metadataFormExecute'));
+			HookRegistry::register('supplementaryfilemetadataform::execute', array($this, 'metadataFormExecute'));
 			// Hook for save into db
 			HookRegistry::register('articledao::getAdditionalFieldNames', array($this, 'addAdditionalFieldNames'));
+			HookRegistry::register('authordao::getAdditionalFieldNames', array($this, 'addAdditionalFieldNames'));
 			HookRegistry::register('supplementaryfiledaodelegate::getLocaleFieldNames', array($this, 'addLocaleFieldNames'));
 			// View Hooks
 			// Submission Add Reviewer
 			HookRegistry::register('advancedsearchreviewerform::display', array($this, 'metadataFormDisplay'));
-
 		}
 		return $success;
 	}
@@ -89,10 +94,17 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	 */
 	function metadataFormDisplay($hookName, $params)
 	{
+		$request = PKPApplication::getRequest();
+		$templateMgr = TemplateManager::getManager($request);
+		$templateMgr->assign('enhMetaDataStyle', $request->getBaseUrl() . '/' . $this->getPluginPath() . '/style/enhancedMetadata.css');
+		$templateMgr->assign('enhMetaDataScript', $request->getBaseUrl() . '/' . $this->getPluginPath() . '/js/enhancedMetadata.js');
+		/*
+		 * TODO doesn't work
+		 * templateMgr->addStyleSheet('enhMetaDataStyle',$request->getBaseUrl() . '/' . $this->getPluginPath() . '/style/enhancedMetadata.css');
+		 * $templateMgr->addJavaScript('enhMetadata',$request->getBaseUrl() . '/' . $this->getPluginPath() . '/js/enhancedMetadata.js', ['inline' => true]);
+		*/
 		$form =& $params[0];
 		if (!is_array($form)) {
-			$request = PKPApplication::getRequest();
-			$templateMgr = TemplateManager::getManager($request);
 			switch (get_class($form)) {
 				case 'SupplementaryFileMetadataForm':
 					$submissionFile = $form->getSubmissionFile();
@@ -100,10 +112,12 @@ class EnhancedMetadataPlugin extends GenericPlugin
 						$form->setData('enhTest2', $submissionFile->getData('enhTest2'));
 					$templateMgr->registerFilter("output", array($this, 'addViewFilter'));
 					break;
+				case "AuthorForm":
+					$templateMgr->registerFilter("output", array($this, 'addViewFilter'));
+					break;
 				case 'AdvancedSearchReviewerForm':
-					// TODO read all schema files in folder! should be own function
 					$submission = $form->getSubmission();
-					$jsonSchema = $this->emDataService->getJsonScheme($this->getPluginPath() . '/submission.json');
+					$jsonSchema = $this->emDataService->getJsonScheme('submission', $this);
 					$jsonData = $submission->getData('enh_' . $jsonSchema['form'] . '_' . $jsonSchema['version']);
 					if (isset($jsonData))
 						$jsonData = json_decode($jsonData, true);
@@ -124,8 +138,6 @@ class EnhancedMetadataPlugin extends GenericPlugin
 							}
 						}
 					}
-					// TODO End
-
 					$form->setData('enhViewArray', $viewArray);
 					$templateMgr->registerFilter("output", array($this, 'addViewFilter'));
 					break;
@@ -143,34 +155,23 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	 * @param $params
 	 * @return bool
 	 */
-	function submissionMetadataInitData($hookName, $params)
+	function metadataFormInit($hookName, $params)
 	{
 		$form =& $params[0];
-		$article = null;
-		if ($form)
-			switch (get_class($form)) {
-				case 'QuickSubmitForm':
-				case 'SubmissionSubmitStep3Form':
-					$article = $form->submission;
-					break;
-				case 'IssueEntrySubmissionReviewForm':
-					$article = $form->getSubmission();
-					break;
-			}
-		if ($article) {
-			$jsonSchema = $this->emDataService->getJsonScheme($this->getPluginPath() . '/submission.json');
-			if ($jsonSchema && $jsonSchema['items']) {
-				$version = $jsonSchema['version'];
-				if ($version && intval($version) && $version > 0) {
-					$json = null;
-					do {
-						$json = $article->getData('enh_' . $jsonSchema['form'] . '_' . $version--);
-					} while ($json == null && $version > 0);
-					if ($json) {
-						$form->setData('enhMetaDataJson', json_decode($json, true));
-					}
-					$form->setData('enhFormFields', $jsonSchema['items']);
+		$formObject = null;
+		$jsonSchema = null;
+		$this->getFormObjectAndJSON($form, $formObject, $jsonSchema);
+		if (isset($formObject) && isset($jsonSchema) && isset($jsonSchema['items'])) {
+			$version = $jsonSchema['version'];
+			if ($version && intval($version) && $version > 0) {
+				$json = null;
+				do {
+					$json = $formObject->getData('enh_' . $jsonSchema['form'] . '_' . $version--);
+				} while ($json == null && $version > 0);
+				if ($json) {
+					$form->setData('enhMetaDataJson', json_decode($json, true));
 				}
+				$form->setData('enhFormFields', $jsonSchema['items']);
 			}
 		}
 		return false;
@@ -185,30 +186,21 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	{
 		$form =& $params[0];
 		$userVars =& $params[1];
-		if ($form)
-			switch (get_class($form)) {
-				case 'QuickSubmitForm':
-				case 'SubmissionSubmitStep3Form':
-				case 'IssueEntrySubmissionReviewForm':
-					$jsonSchema = $this->emDataService->getJsonScheme($this->getPluginPath() . '/submission.json');
-					if ($jsonSchema && $jsonSchema['items']) {
-						$names = $this->emDataService->getNameParam($jsonSchema['items']);
-						$this->addChecks($form, $jsonSchema['items']);
-						foreach ($names as $name)
-							$userVars[] = $name;
-					}
-					break;
-				case 'SupplementaryFileMetadataForm':
-					$userVars[] = 'enhTest2';
-					break;
-			}
+		$jsonSchema = null;
+		$this->getFormObjectAndJSON($form, $formObject, $jsonSchema);
+		if (isset($jsonSchema) && isset($jsonSchema['items'])) {
+			$names = $this->emDataService->getNameParam($jsonSchema['items']);
+			$this->addChecks($form, $jsonSchema['items']);
+			foreach ($names as $name)
+				$userVars[] = $name;
+		}
 		return false;
 	}
 
 	function submissionMetadataValidate($hookName, $params)
 	{
 		$form =& $params[0];
-		$jsonSchema = $this->emDataService->getJsonScheme($this->getPluginPath() . '/submission.json');
+		$jsonSchema = $this->emDataService->getJsonScheme('submission', $this);
 		if ($jsonSchema && $jsonSchema['items']) {
 			$names = $this->emDataService->getNameParam($jsonSchema['items']);
 			$enhData = [];
@@ -225,37 +217,19 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	 * @param $params
 	 * @return bool
 	 */
-	function submissionMetadataExecute($hookName, $params)
+	function metadataFormExecute($hookName, $params)
 	{
 		$form =& $params[0];
-		$article = null;
-		$submissionFile = null;
-		switch (get_class($form)) {
-			case 'SubmissionSubmitStep3Form':
-			case 'QuickSubmitForm':
-				$article = $form->submission;
-				break;
-			case 'IssueEntrySubmissionReviewForm':
-				$article = $form->getSubmission();
-				break;
-			case 'SupplementaryFileMetadataForm':
-				$submissionFile = $form->getSubmissionFile();
-				break;
-		}
-		if ($article != null) {
+		$formObject = null;
+		$jsonSchema = null;
+		$this->getFormObjectAndJSON($form, $formObject, $jsonSchema);
+		if (isset($formObject) && isset($jsonSchema) && isset($jsonSchema['items'])) {
 			$enhData = [];
-			// TODO read all schema files in folder and save in db with schema name!!!
-			$jsonSchema = $this->emDataService->getJsonScheme($this->getPluginPath() . '/submission.json');
-			if ($jsonSchema && $jsonSchema['items']) {
-				$names = $this->emDataService->getNameParam($jsonSchema['items']);
-				foreach ($names as $name) {
-					$enhData[$name] = $form->getData($name);
-				}
+			$names = $this->emDataService->getNameParam($jsonSchema['items']);
+			foreach ($names as $name) {
+				$enhData[$name] = $form->getData($name);
 			}
-			$article->setData('enh_' . $jsonSchema['form'] . '_' . $jsonSchema['version'], json_encode($enhData));
-		}
-		if ($submissionFile != null) {
-			$submissionFile->setData('enhTest2', $form->getData('enhTest2'));
+			$formObject->setData('enh_' . $jsonSchema['form'] . '_' . $jsonSchema['version'], json_encode($enhData));
 		}
 		return false;
 	}
@@ -268,14 +242,23 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	function addAdditionalFieldNames($hookName, $params)
 	{
 		$form =& $params[0];
-		$jsonSchema = $this->emDataService->getJsonScheme($this->getPluginPath() . '/submission.json');
+		$jsonSchema = null;
 		switch (get_class($form)) {
 			case 'ArticleDAO':
+				$jsonSchema = $this->emDataService->getJsonScheme('submission', $this);
+				break;
+			case 'AuthorDAO':
+				$jsonSchema = $this->emDataService->getJsonScheme('author', $this);
+				break;
 			case 'SupplementaryFileDAODelegate':
-				$fields =& $params[1];
-				$fields[] = 'enh_' . $jsonSchema['form'] . '_' . $jsonSchema['version'];
+				$jsonSchema = $this->emDataService->getJsonScheme('supplementary', $this);
 				break;
 		}
+		if (isset($jsonSchema)) {
+			$fields =& $params[1];
+			$fields[] = 'enh_' . $jsonSchema['form'] . '_' . $jsonSchema['version'];
+		}
+
 		return false;
 	}
 
@@ -296,6 +279,14 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			$newOutput = substr($output, 0, $offset + strlen($match));
 			$newOutput .= $templateMgr->fetch($this->getTemplateResource('supplementaryMetaData.tpl'));
 			$newOutput .= substr($output, $offset + strlen($match));
+			$output = $newOutput;
+			$templateMgr->unregisterFilter('output', array($this, 'addViewFilter'));
+		} else if (preg_match('/<div\s*id="\s*userGroupId\s*"/', $output, $matches, PREG_OFFSET_CAPTURE)) {
+			$match = $matches[0][0];
+			$offset = $matches[0][1];
+			$newOutput = substr($output, 0, $offset + strlen($match));
+			$newOutput .= $templateMgr->fetch($this->getTemplateResource('submissionMetaData.tpl'));
+			$newOutput .= substr($output, $offset);
 			$output = $newOutput;
 			$templateMgr->unregisterFilter('output', array($this, 'addViewFilter'));
 		}
@@ -371,4 +362,35 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		return parent::manage($args, $request);
 	}
 
+	/**
+	 * @param $form
+	 * @param $formObject
+	 * @param $jsonSchema
+	 */
+	private function getFormObjectAndJSON($form, &$formObject, &$jsonSchema): void
+	{
+		if (isset($form))
+			switch (get_class($form)) {
+				case 'SubmissionSubmitStep3Form':
+				case 'QuickSubmitForm':
+					$formObject = $form->submission;
+					$jsonSchema = $this->emDataService->getJsonScheme('submission', $this);
+					break;
+				case 'IssueEntrySubmissionReviewForm':
+					$formObject = $form->getSubmission();
+					$jsonSchema = $this->emDataService->getJsonScheme('submission', $this);
+					break;
+				case 'SupplementaryFileMetadataForm':
+					$formObject = $form->getSubmissionFile();
+					$jsonSchema = $this->emDataService->getJsonScheme('supplementary', $this);
+					break;
+				case "AuthorForm":
+					$formObject = $form->getAuthor();
+					$jsonSchema = $this->emDataService->getJsonScheme('author', $this);
+					break;
+			}
+	}
+
 }
+
+
