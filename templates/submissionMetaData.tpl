@@ -10,14 +10,17 @@
  * Enhanced Metadata Submission Form
  *
  *}
+{if isset($hideFormElements)}
+	<input type="hidden" value="{$hideFormElements|escape|trim}" class="hideFormElements">
+{/if}
 <link rel="stylesheet" type="text/css" href="{$enhMetaDataStyle}">
-<script src="{$enhMetaDataScript}" type="text/javascript"></script>
+<script src="{$enhMetaDataScript}" type="text/javascript" defer></script>
 
 
 {*{fbvFormSection title="plugins.generic.enhanced.metadata.submission.title" class="enhanced-metadata"}
 	<p class="description">{translate key="plugins.generic.enhanced.metadata.submission.description"}</p>
 {/fbvFormSection}*}
-{fbvFormArea id="enhanced-metadata-form"}
+{fbvFormArea class="enhanced-metadata-form"}
 {foreach from=$enhFormFields item=$itm}
     {if $itm['type']=='text' || $itm['type']=='textarea'}
 		<div {if $itm['condition']}class="section em-hidden-field {$itm['class']}" data-condition="{json_encode($itm['condition'])|escape|trim}"

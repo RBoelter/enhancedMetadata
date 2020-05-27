@@ -1,6 +1,3 @@
-console.log("##################################################");
-
-
 document.querySelectorAll('[data-condition]').forEach(field => {
 
 	let condition = JSON.parse(field.getAttribute('data-condition'));
@@ -40,3 +37,10 @@ function checkboxListener(elem, c_elem, c_value) {
 document.querySelectorAll('.checkNum').forEach(function (el) {
 	el.addEventListener("input", elem => el.value = (isNaN(el.value)) ? el.value.replace(elem.data, '') : el.value);
 })
+
+if (document.querySelectorAll('.hideFormElements'))
+	document.querySelectorAll('.hideFormElements')
+		.forEach(hidden => JSON.parse(hidden.value)
+			.forEach(elem => document.querySelectorAll('[id^="' + elem + '"]')
+				.forEach(e => e.style.display = 'none')));
+

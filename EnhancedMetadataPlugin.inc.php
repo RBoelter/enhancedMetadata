@@ -161,9 +161,10 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		$formObject = null;
 		$jsonSchema = null;
 		$this->getFormObjectAndJSON($form, $formObject, $jsonSchema);
-		if (isset($formObject) && isset($jsonSchema) && isset($jsonSchema['items'])) {
+		if (isset($jsonSchema) && isset($jsonSchema['items'])) {
+			$form->setData('enhFormFields', $jsonSchema['items']);
 			$version = $jsonSchema['version'];
-			if ($version && intval($version) && $version > 0) {
+			if (isset($formObject) && $version && intval($version) && $version > 0) {
 				$json = null;
 				do {
 					$json = $formObject->getData('enh_' . $jsonSchema['form'] . '_' . $version--);
@@ -171,7 +172,10 @@ class EnhancedMetadataPlugin extends GenericPlugin
 				if ($json) {
 					$form->setData('enhMetaDataJson', json_decode($json, true));
 				}
-				$form->setData('enhFormFields', $jsonSchema['items']);
+			}
+			if (get_class($form) == "AuthorForm" && isset($jsonSchema['hideOJSDefaultRoles']) && $jsonSchema['hideOJSDefaultRoles'] == true) {
+				$form->setData('hideFormElements', json_encode(["userGroupId"]));
+				$form->setData('userGroupId', 31);
 			}
 		}
 		return false;
@@ -258,7 +262,6 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			$fields =& $params[1];
 			$fields[] = 'enh_' . $jsonSchema['form'] . '_' . $jsonSchema['version'];
 		}
-
 		return false;
 	}
 
@@ -281,10 +284,10 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			$newOutput .= substr($output, $offset + strlen($match));
 			$output = $newOutput;
 			$templateMgr->unregisterFilter('output', array($this, 'addViewFilter'));
-		} else if (preg_match('/<div\s*id="\s*userGroupId\s*"/', $output, $matches, PREG_OFFSET_CAPTURE)) {
+		} else if (preg_match('/<p><span class="formRequired">/', $output, $matches, PREG_OFFSET_CAPTURE)) {
 			$match = $matches[0][0];
 			$offset = $matches[0][1];
-			$newOutput = substr($output, 0, $offset + strlen($match));
+			$newOutput = substr($output, 0, $offset);
 			$newOutput .= $templateMgr->fetch($this->getTemplateResource('submissionMetaData.tpl'));
 			$newOutput .= substr($output, $offset);
 			$output = $newOutput;
