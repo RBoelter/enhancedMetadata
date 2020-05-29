@@ -1,5 +1,4 @@
 document.querySelectorAll('[data-condition]').forEach(field => {
-
 	let condition = JSON.parse(field.getAttribute('data-condition'));
 	collect(field, condition.item, condition.value);
 });
@@ -38,9 +37,16 @@ document.querySelectorAll('.checkNum').forEach(function (el) {
 	el.addEventListener("input", elem => el.value = (isNaN(el.value)) ? el.value.replace(elem.data, '') : el.value);
 })
 
+// hide OJS contributor role and select the first role per default
 if (document.querySelectorAll('.hideFormElements'))
 	document.querySelectorAll('.hideFormElements')
 		.forEach(hidden => JSON.parse(hidden.value)
 			.forEach(elem => document.querySelectorAll('[id^="' + elem + '"]')
-				.forEach(e => e.style.display = 'none')));
+				.forEach(e => {
+					if (elem === "userGroupId")
+						e.querySelector("input").checked = true;  // check first radio btn;
+					e.style.display = 'none';
+				})));
+
+
 

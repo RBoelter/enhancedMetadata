@@ -59,7 +59,6 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			HookRegistry::register('issueentrysubmissionreviewform::initdata', array($this, 'metadataFormInit'));
 			HookRegistry::register('quicksubmitform::initdata', array($this, 'metadataFormInit'));
 			HookRegistry::register('authorform::initdata', array($this, 'metadataFormInit'));
-			/*HookRegistry::register('supplementaryfilemetadataform::initdata', array($this, 'submissionMetadataInitData'));*/
 			// Hook for readUserVars
 			HookRegistry::register('submissionsubmitstep3form::readuservars', array($this, 'addUserVars'));
 			HookRegistry::register('issueentrysubmissionreviewform::readuservars', array($this, 'addUserVars'));
@@ -78,7 +77,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			// Hook for save into db
 			HookRegistry::register('articledao::getAdditionalFieldNames', array($this, 'addAdditionalFieldNames'));
 			HookRegistry::register('authordao::getAdditionalFieldNames', array($this, 'addAdditionalFieldNames'));
-			HookRegistry::register('supplementaryfiledaodelegate::getLocaleFieldNames', array($this, 'addLocaleFieldNames'));
+			HookRegistry::register('supplementaryfiledaodelegate::getLocaleFieldNames', array($this, 'addAdditionalFieldNames'));
 			// View Hooks
 			// Submission Add Reviewer
 			HookRegistry::register('advancedsearchreviewerform::display', array($this, 'metadataFormDisplay'));
@@ -107,9 +106,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		if (!is_array($form)) {
 			switch (get_class($form)) {
 				case 'SupplementaryFileMetadataForm':
-					$submissionFile = $form->getSubmissionFile();
-					if ($submissionFile)
-						$form->setData('enhTest2', $submissionFile->getData('enhTest2'));
+					$this->metadataFormInit($hookName, $params);
 					$templateMgr->registerFilter("output", array($this, 'addViewFilter'));
 					break;
 				case "AuthorForm":
@@ -175,7 +172,6 @@ class EnhancedMetadataPlugin extends GenericPlugin
 			}
 			if (get_class($form) == "AuthorForm" && isset($jsonSchema['hideOJSDefaultRoles']) && $jsonSchema['hideOJSDefaultRoles'] == true) {
 				$form->setData('hideFormElements', json_encode(["userGroupId"]));
-				$form->setData('userGroupId', 31);
 			}
 		}
 		return false;
@@ -279,9 +275,9 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		} else if (preg_match('/<fieldset\s*id="\s*fileMetaData\s*"\s*>/', $output, $matches, PREG_OFFSET_CAPTURE)) {
 			$match = $matches[0][0];
 			$offset = $matches[0][1];
-			$newOutput = substr($output, 0, $offset + strlen($match));
-			$newOutput .= $templateMgr->fetch($this->getTemplateResource('supplementaryMetaData.tpl'));
-			$newOutput .= substr($output, $offset + strlen($match));
+			$newOutput = substr($output, 0, $offset);
+			$newOutput .= $templateMgr->fetch($this->getTemplateResource('submissionMetaData.tpl'));
+			$newOutput .= substr($output, $offset);
 			$output = $newOutput;
 			$templateMgr->unregisterFilter('output', array($this, 'addViewFilter'));
 		} else if (preg_match('/<p><span class="formRequired">/', $output, $matches, PREG_OFFSET_CAPTURE)) {
@@ -385,7 +381,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 					break;
 				case 'SupplementaryFileMetadataForm':
 					$formObject = $form->getSubmissionFile();
-					$jsonSchema = $this->emDataService->getJsonScheme('supplementary', $this);
+					$jsonSchema = $this->emDataService->getJsonScheme('supplement', $this);
 					break;
 				case "AuthorForm":
 					$formObject = $form->getAuthor();
