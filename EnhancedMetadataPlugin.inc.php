@@ -97,6 +97,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 		$templateMgr = TemplateManager::getManager($request);
 		$templateMgr->assign('enhMetaDataStyle', $request->getBaseUrl() . '/' . $this->getPluginPath() . '/style/enhancedMetadata.css');
 		$templateMgr->assign('enhMetaDataScript', $request->getBaseUrl() . '/' . $this->getPluginPath() . '/js/enhancedMetadata.js');
+		$templateMgr->assign("tmplRes", $this->getTemplateResource());
 		/*
 		 * TODO doesn't work
 		 * templateMgr->addStyleSheet('enhMetaDataStyle',$request->getBaseUrl() . '/' . $this->getPluginPath() . '/style/enhancedMetadata.css');
