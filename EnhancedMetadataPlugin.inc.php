@@ -114,6 +114,7 @@ class EnhancedMetadataPlugin extends GenericPlugin
 					$templateMgr->registerFilter("output", array($this, 'addViewFilter'));
 					break;
 				case 'AdvancedSearchReviewerForm':
+					error_log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
 					$submission = $form->getSubmission();
 					$jsonSchema = $this->emDataService->getJsonScheme('submission', $this);
 					$jsonData = $submission->getData('enh_' . $jsonSchema['form'] . '_' . $jsonSchema['version']);
