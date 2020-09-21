@@ -49,38 +49,44 @@ class EnhancedMetadataPlugin extends GenericPlugin
 	public function register($category, $path, $mainContextId = NULL)
 	{
 		$success = parent::register($category, $path);
-		if ($success && $this->getEnabled()) {
-			// Add metadata fields to submission
-			HookRegistry::register('Templates::Submission::SubmissionMetadataForm::AdditionalMetadata', array($this, 'metadataFormDisplay'));
-			HookRegistry::register('supplementaryfilemetadataform::display', array($this, 'metadataFormDisplay'));
-			HookRegistry::register('authorform::display', array($this, 'metadataFormDisplay'));
-			// Hook for initData
-			HookRegistry::register('submissionsubmitstep3form::initdata', array($this, 'metadataFormInit'));
-			HookRegistry::register('issueentrysubmissionreviewform::initdata', array($this, 'metadataFormInit'));
-			HookRegistry::register('quicksubmitform::initdata', array($this, 'metadataFormInit'));
-			HookRegistry::register('authorform::initdata', array($this, 'metadataFormInit'));
-			// Hook for readUserVars
-			HookRegistry::register('submissionsubmitstep3form::readuservars', array($this, 'addUserVars'));
-			HookRegistry::register('issueentrysubmissionreviewform::readuservars', array($this, 'addUserVars'));
-			HookRegistry::register('quicksubmitform::readuservars', array($this, 'addUserVars'));
-			HookRegistry::register('authorform::readuservars', array($this, 'addUserVars'));
-			HookRegistry::register('supplementaryfilemetadataform::readuservars', array($this, 'addUserVars'));
-			// Hook for form validation
-			// TODO Validate for all forms
-			HookRegistry::register('submissionsubmitstep3form::validate', array($this, 'submissionMetadataValidate'));
-			// Hook for form execute
-			HookRegistry::register('submissionsubmitstep3form::execute', array($this, 'metadataFormExecute'));
-			HookRegistry::register('issueentrysubmissionreviewform::execute', array($this, 'metadataFormExecute'));
-			HookRegistry::register('quicksubmitform::execute', array($this, 'metadataFormExecute'));
-			HookRegistry::register('authorform::execute', array($this, 'metadataFormExecute'));
-			HookRegistry::register('supplementaryfilemetadataform::execute', array($this, 'metadataFormExecute'));
-			// Hook for save into db
-			HookRegistry::register('articledao::getAdditionalFieldNames', array($this, 'addAdditionalFieldNames'));
-			HookRegistry::register('authordao::getAdditionalFieldNames', array($this, 'addAdditionalFieldNames'));
-			HookRegistry::register('supplementaryfiledaodelegate::getLocaleFieldNames', array($this, 'addAdditionalFieldNames'));
-			// View Hooks
-			// Submission Add Reviewer
-			HookRegistry::register('advancedsearchreviewerform::display', array($this, 'metadataFormDisplay'));
+		$request = PKPApplication::getRequest();
+		$context = $request->getContext();
+		$user = $request->getUser();
+		if(isset($user) && isset($context)) {
+			$accessViaRole = $user->hasRole(array(ROLE_ID_AUTHOR, ROLE_ID_MANAGER), $context->getId());
+			if ($success && $this->getEnabled() && $accessViaRole) {
+				// Add metadata fields to submission
+				HookRegistry::register('Templates::Submission::SubmissionMetadataForm::AdditionalMetadata', array($this, 'metadataFormDisplay'));
+				HookRegistry::register('supplementaryfilemetadataform::display', array($this, 'metadataFormDisplay'));
+				HookRegistry::register('authorform::display', array($this, 'metadataFormDisplay'));
+				// Hook for initData
+				HookRegistry::register('submissionsubmitstep3form::initdata', array($this, 'metadataFormInit'));
+				HookRegistry::register('issueentrysubmissionreviewform::initdata', array($this, 'metadataFormInit'));
+				HookRegistry::register('quicksubmitform::initdata', array($this, 'metadataFormInit'));
+				HookRegistry::register('authorform::initdata', array($this, 'metadataFormInit'));
+				// Hook for readUserVars
+				HookRegistry::register('submissionsubmitstep3form::readuservars', array($this, 'addUserVars'));
+				HookRegistry::register('issueentrysubmissionreviewform::readuservars', array($this, 'addUserVars'));
+				HookRegistry::register('quicksubmitform::readuservars', array($this, 'addUserVars'));
+				HookRegistry::register('authorform::readuservars', array($this, 'addUserVars'));
+				HookRegistry::register('supplementaryfilemetadataform::readuservars', array($this, 'addUserVars'));
+				// Hook for form validation
+				// TODO Validate for all forms
+				HookRegistry::register('submissionsubmitstep3form::validate', array($this, 'submissionMetadataValidate'));
+				// Hook for form execute
+				HookRegistry::register('submissionsubmitstep3form::execute', array($this, 'metadataFormExecute'));
+				HookRegistry::register('issueentrysubmissionreviewform::execute', array($this, 'metadataFormExecute'));
+				HookRegistry::register('quicksubmitform::execute', array($this, 'metadataFormExecute'));
+				HookRegistry::register('authorform::execute', array($this, 'metadataFormExecute'));
+				HookRegistry::register('supplementaryfilemetadataform::execute', array($this, 'metadataFormExecute'));
+				// Hook for save into db
+				HookRegistry::register('articledao::getAdditionalFieldNames', array($this, 'addAdditionalFieldNames'));
+				HookRegistry::register('authordao::getAdditionalFieldNames', array($this, 'addAdditionalFieldNames'));
+				HookRegistry::register('supplementaryfiledaodelegate::getLocaleFieldNames', array($this, 'addAdditionalFieldNames'));
+				// View Hooks
+				// Submission Add Reviewer
+				HookRegistry::register('advancedsearchreviewerform::display', array($this, 'metadataFormDisplay'));
+			}
 		}
 		return $success;
 	}
